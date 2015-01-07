@@ -1,0 +1,9 @@
+
+.*project
+obj
+bin
+*.d
+Debug/*
+tmp*
+err*
+
