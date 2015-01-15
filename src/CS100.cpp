@@ -14,5 +14,8 @@ int main() {
 	Shell shell;
 
 	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+
+	shell.StartShell(0, 0);
+
 	return 0;
 }
