@@ -18,6 +18,10 @@ obj/Shell.o:src/Shell.cpp
 obj/CS100.o:src/CS100.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+obj/log.o:src/log.cpp 
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS) $< -o $@
 
 
 clean:
