@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-
+using std::vector;
+using std::string;
 
 class Shell {
 public:
@@ -25,13 +26,18 @@ public:
 	virtual ~Shell();
 
 private:
-	std::string mCurrentDirectory;
-	void needToExit();
+	string mCurrentDirectory;
+	vector<vector<string> > TokenizeToConnectors(vector<vector<string> > completeStream);
+	vector<vector<string> > TokenizeToSpaces(vector<vector<string> > completeStream);
+	vector<vector<string> > TokenizeToLogicalEND(string completeCommands);
+	vector<vector<string> > TokenizeToLogicalOR(vector<vector<string> > parseVector);
+	vector<vector<string> > TokenizeToLogicalAND(vector<vector<string> > parseVector);
+    vector<vector<string> > TokenizeCommandStream(string commandStream);
 	void handleChildExecution(std::vector<std::string> command);
 	bool handleParentExecution(pid_t pid,bool wait);
-	std::string tildeExpansion();
-	std::string getHomeDirectory();
-	std::string getCWD();
+	string tildeExpansion();
+	string getHomeDirectory();
+	string getCWD();
 	bool callCD(std::string path);
 };
 

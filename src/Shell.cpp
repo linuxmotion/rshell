@@ -102,55 +102,89 @@ std::string Shell::ReadInCommands(){
 	return string(mBuffer);
 }
 
-vector<vector<string> > Shell::ParseCommands(string commandsStream){
-	log("parsing commands")
+vector<vector<string> > Shell::TokenizeCommandStream(string commandStream) {
 
-	vector<string> commandStrings;
+	log("Tokenizing commands")
+	vector<vector<string> > completeENDedCommands = TokenizeToLogicalEND(commandStream);
+	vector<vector<string> > completeORedCommands = TokenizeToLogicalOR(completeENDedCommands);
+	vector<vector<string> > completedANDCommands = TokenizeToLogicalAND(completeORedCommands);
+	vector<vector<string> > completedConnecterizedCommands = TokenizeToConnectors(completedANDCommands);
+	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedConnecterizedCommands);
+
+	return completedTokenCommands;
+
+}
+vector<vector<string> > splitToVector(string completeStream, string delim){
+
+	vector<string>  commands;
 	vector<vector<string> > commandSet;
 
-	// Break it up by tokens
-	char *comm = new char;
-	if(commandsStream.empty())
-		return commandSet;
+	int foundAt = -1;
+	int start = 0;
+	int end = 0;
+	char *commandString;
+	do{
 
-	log("copying strings")
-	strcpy( comm, commandsStream.c_str());
-	log(comm)
-	log("Tokenzing")
-	char* prog = strtok(comm, "&& || ; ");
+		// First the first occurence of the delim
+		foundAt = end = completeStream.find(delim, start);
+		// cut the string from the start of the token to the delim
+		// or from the start of the token to the end of the string
+		// if no delim is found
 
+		log("First string")
+		log(start)
+		if(foundAt < 0)
+			end = completeStream.size();
+		log(end)
 
-	// Put all the tokens into a vector
-	// This is where take each set of command by connectors
-	/*
-	 * Set of all exec commands
-	 * {
-	 * 	{Command set one }
-	 * 	{Command set two}
-	 * }
-	 *Valid conectors are &&, ||, ;
-	 */
+		int sSize = end-start;
+		commandString = new char[256];
 
-	while (prog != NULL) {
-		string tok = "token pulled: ";
-		string pr = prog;
-		tok += pr;
-		log(tok)
-		commandStrings.push_back(prog);
-		if(pr == "&&" || pr == "||" || pr == ";"){
-			// Push all the
-			commandSet.push_back(commandStrings);
-			commandStrings.clear();
-
+		completeStream.copy(commandString, sSize, start);
+		log(string(commandString))
+		//push back the command stream between tokens
+		commands.push_back(string(commandString));
+		if(foundAt < 0){
+			commandSet.push_back(commands);
+			break;
 		}
-		prog = strtok(NULL, " ");
+
+		start = start + sSize ;
+
+		commandString = 0;
+		delete commandString;
+
+		commandString = new char[256];
+
+		// Next grab the delim
+		log("Second string: delim")
+		log(start)
+		end = start + delim.size();
+		log(end)
+
+		sSize = end-start;
+		completeStream.copy(commandString, sSize, start );
+		// push back the deliminator
+		log(string(commandString))
+		commands.push_back(string(commandString));
+
+		commandString = 0;
+		delete commandString;
 
 
-	}
-	// Push back at least on set if the was a command to push
-	if(commandStrings.size() > 0)
-		commandSet.push_back(commandStrings);
-// Debug command the command set
+		// next start of token happens after the delim
+		start = end + delim.size();
+		// push back the tokenized vector
+
+		commandSet.push_back(commands);
+		// clear the commands vector, in prep for next loop
+		commands.clear();
+
+		// Do this while there is a deliminator
+	}while(foundAt > 0);
+	commandString = 0;
+	delete commandString;
+
 #ifdef DEBUG
 	int size = commandSet.size();
 	string message1 = "Command set size: " ;
@@ -165,10 +199,105 @@ vector<vector<string> > Shell::ParseCommands(string commandsStream){
 	}
 #endif
 
+	return commandSet;
+}
 
-	comm = 0;
-	delete comm;
+vector<vector<string> > Shell::TokenizeToConnectors(vector<vector<string> > completeStream){
+	log("Connectorizing")
 
+
+	return completeStream;
+
+}vector<vector<string> > Shell::TokenizeToSpaces(vector<vector<string> > completeStream){
+	log("Tokenizing spaces")
+
+	vector<string> spaceVector;
+	vector<string> tmpVector;
+	vector<vector<string> > commandSet;
+	char* buffer = new char[256];
+
+	for(int i = 0; i < completeStream.size(); i++){
+		log("Looping through vectors to tokenize")
+		// loop through the connectorized vectors
+		spaceVector = completeStream[i];
+		for(int z = 0; z < spaceVector.size(); z++){
+			log("Tokenizing a vector")
+			// tokenize each string
+			strcpy(buffer,spaceVector[0].c_str());
+			char* prog = strtok(buffer, " ");
+				// Put all the tokens into a vector
+
+			while (prog != NULL) {
+				// push back a new token
+				tmpVector.push_back(prog);
+				log(prog)
+				prog = strtok(NULL, " ");
+			}
+			// Push the connector
+			if(spaceVector.size() > 1)
+				tmpVector.push_back(spaceVector[1]);
+			// push the tokenized vector
+			commandSet.push_back(tmpVector);
+			// clear the token vecotr for reuse
+			tmpVector.clear();
+
+		}
+
+
+
+	}
+	buffer = 0;
+	delete buffer;
+
+
+	return commandSet;
+
+}
+vector<vector<string> > Shell::TokenizeToLogicalEND(string completeStream){
+	log("Tokenizing ends")
+	vector<vector<string> > commandSet = splitToVector(completeStream, ";");
+
+	return commandSet;
+
+}
+
+vector<vector<string> > Shell::TokenizeToLogicalAND(vector<vector<string> > parseVector){
+	log("Tokenizing and")
+	vector<string>  commands;
+	vector<vector<string> > commandSet;
+
+	return parseVector;
+}
+vector<vector<string> > Shell::TokenizeToLogicalOR(vector<vector<string> > commandVector){
+	log("Tokenizing or")
+
+	int size = commandVector.size();
+	for(int i = 0; i < size; i++){
+
+
+
+	}
+
+	return commandVector;
+}
+vector<vector<string> > Shell::ParseCommands(string commandStream){
+	log("parsing commands")
+
+
+	vector<vector<string> > commandSet;
+
+	// Check if there are commands to parse
+	if(commandStream.empty())
+		return commandSet;
+
+	// resize the array to remove anything after the #
+	int comment = commandStream.find_first_of('#');
+	if(comment != string::npos)
+		commandStream.resize(comment-1);
+
+	// log the whole stream to parse the kick of the parser
+	log(commandStream)
+	commandSet = TokenizeCommandStream(commandStream);
 
 	return commandSet;
 }
@@ -184,48 +313,47 @@ bool isConnector(string str){
 void Shell::handleChildExecution(vector<string> command) {
 	log("Executing child process")
 	int size = command.size()+1;
-
+	log(size)
+	log("commands Found")
 	char** argv = new char*[size];
 
-	char* str = new char;
+	// Null the last command
+	argv[size-1] = NULL;
+
+	char* str;
 	log("Deep copy paramaters")
 	for(int i = 0; i < size-1; i++ ){
 		//log(command[i].c_str())
-		strcpy(str,command[i].c_str());
-		argv[i] = new char;
-
-		if(isConnector(command[i])){
+		str = new char[256];
+		if(command[i] == " "){
 			argv[i] = NULL;
 			log("NULL")
-		}else{
+		}
+		else{
+			strcpy(str,command[i].c_str());
+			argv[i] = new char;
+			if(isConnector(command[i])){
+				argv[i] = NULL;
+				log("NULL")
+			}else{
 
-			strcpy(argv[i],str);
-			log(str);
+				strcpy(argv[i],str);
+				log(str);
+			}
 		}
 
 
 
+		// Clear the string
+		strcpy(str,"");
 
-
-		//log(argv[i])
-		//if(isConnector(command[i])){
-		//			str = NULL;
-		//			log("Turning connector to NULL")
-		//		}else{
-		//			strcpy(strr, command[i].c_str());
-		//		log(str)
-		//			argv[i] = new char;
-		//			strcpy(argv[i],strr);
-		//			str = 0;
-		//		}
-		//log(argv[i])
+		str = 0;
+		delete str;
 
 	}
 	log("About to dump commands")
-
+    // Last command is always NULL
 	dumpCommands(argv, size);
-
-	//argv[command.size()] = NULL;
 
 	log("Executing: ")
 	log(argv[0]);
