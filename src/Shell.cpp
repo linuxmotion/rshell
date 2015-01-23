@@ -220,8 +220,8 @@ vector<vector<string> > Shell::TokenizeToConnectors(vector<vector<string> > comp
 		log("Looping through vectors to tokenize")
 		// loop through the connectorized vectors
 		spaceVector = completeStream[i];
-		for(int z = 0; z < spaceVector.size(); z++){
-			log("Tokenizing a vector")
+		for(int z = 0; z < (spaceVector.size()-1); z++){
+			log("Tokenizing a vector for spaces")
 			// tokenize each string
 			strcpy(buffer,spaceVector[0].c_str());
 			char* prog = strtok(buffer, " ");
@@ -263,8 +263,58 @@ vector<vector<string> > Shell::TokenizeToLogicalEND(string completeStream){
 
 vector<vector<string> > Shell::TokenizeToLogicalAND(vector<vector<string> > parseVector){
 	log("Tokenizing and")
-	vector<string>  commands;
+
+	vector<string> spaceVector;
+	vector<string> tmpVector;
 	vector<vector<string> > commandSet;
+	char* buffer = new char[256];
+
+		for(int i = 0; i < parseVector.size(); i++){
+			log("Looping through vectors to tokenize")
+			// loop through the connectorized vectors
+			spaceVector = parseVector[i];
+			for(int z = 0; z < spaceVector.size(); z++){
+				log("Tokenizing a spaceVector")
+				// tokenize each string
+				strcpy(buffer,spaceVector[0].c_str());
+				char* prog = strtok(buffer, "&&");
+					// Put all the tokens into a vector
+
+				while (prog != NULL) {
+					// push back a the program token
+					tmpVector.push_back(prog);
+					// push back deliminator
+					tmpVector.push_back("&&");
+					// push this set into the larger set
+					commandSet.push_back(tmpVector);
+					log(prog)
+					prog = strtok(NULL, "&&");
+					// clear the tmp vector
+					tmpVector.clear();
+
+				}
+				// Push the connector
+				//if(spaceVector.size() > 1)
+				//	tmpVector.push_back(spaceVector[1]);
+				// push the tokenized vector
+				//commandSet.push_back(tmpVector);
+				// clear the token vecotr for reuse
+				tmpVector.clear();
+
+			}
+
+
+
+		}
+		buffer = 0;
+		delete buffer;
+
+		log("found ")
+		log(commandSet.size())
+		log("command stream")
+
+
+		return commandSet;
 
 	return parseVector;
 }
