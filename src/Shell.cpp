@@ -227,28 +227,41 @@ vector<vector<string> > Shell::TokenizeToConnectors(vector<vector<string> > comp
 			char* prog = strtok(buffer, " ");
 				// Put all the tokens into a vector
 
+
 			while (prog != NULL) {
-				// push back a new token
+				// push back a the program token
 				tmpVector.push_back(prog);
+
+
 				log(prog)
 				prog = strtok(NULL, " ");
+				// clear the tmp vector
+				//tmpVector.clear();
+
 			}
-			// Push the connector
-			if(spaceVector.size() > 1)
-				tmpVector.push_back(spaceVector[1]);
-			// push the tokenized vector
+			// push this tokenized set into the larger set
 			commandSet.push_back(tmpVector);
-			// clear the token vecotr for reuse
+
 			tmpVector.clear();
-
 		}
-
 
 
 	}
 	buffer = 0;
 	delete buffer;
+#ifdef DEBUG
+	int size = commandSet.size();
+	string message1 = "Command set size: " ;
+	log(message1)
+	log(size)
+	for(int z = 0; z < commandSet.size(); z++){
 
+			int sizze = commandSet[z].size();
+			string message1 = "Command string size: " ;
+			log(message1)
+			log(sizze)
+	}
+#endif
 
 	return commandSet;
 
@@ -273,7 +286,7 @@ vector<vector<string> > Shell::TokenizeToLogicalAND(vector<vector<string> > pars
 			log("Looping through vectors to tokenize")
 			// loop through the connectorized vectors
 			spaceVector = parseVector[i];
-			for(int z = 0; z < spaceVector.size(); z++){
+			for(int z = 0; z < spaceVector.size()-1; z++){
 				log("Tokenizing a spaceVector")
 				// tokenize each string
 				strcpy(buffer,spaceVector[0].c_str());
@@ -321,15 +334,79 @@ vector<vector<string> > Shell::TokenizeToLogicalAND(vector<vector<string> > pars
 vector<vector<string> > Shell::TokenizeToLogicalOR(vector<vector<string> > commandVector){
 	log("Tokenizing or")
 
-	int size = commandVector.size();
-	for(int i = 0; i < size; i++){
+		vector<string> spaceVector;
+			vector<string> tmpVector;
+			vector<vector<string> > commandSet;
+			char* buffer = new char[256];
+
+				for(int i = 0; i < commandVector.size(); i++){
+					log("Looping through vectors to tokenize")
+					// loop through the connectorized vectors
+					spaceVector = commandVector[i];
+				//	for(int z = 0; z < spaceVector.size(); z++){
+						log("Tokenizing a spaceVector")
+						// tokenize each string
+						strcpy(buffer,spaceVector[0].c_str());
+						char* prog = strtok(buffer, "||");
+							// Put all the tokens into a vector
+
+						while (prog != NULL) {
+							// push back a the program token
+							tmpVector.push_back(prog);
+							// push back deliminator
+							tmpVector.push_back("||");
+							// push this set into the larger set
+							commandSet.push_back(tmpVector);
+							log(prog)
+							prog = strtok(NULL, "||");
+							// clear the tmp vector
+							tmpVector.clear();
+
+						}
+						// Push the connector
+						//if(spaceVector.size() > 1)
+						//	tmpVector.push_back(spaceVector[1]);
+						// push the tokenized vector
+						//commandSet.push_back(tmpVector);
+						// clear the token vecotr for reuse
+						tmpVector.clear();
+
+				//	}
+
+
+
+				}
+				buffer = 0;
+				delete buffer;
+
+				log("found ")
+				log(commandSet.size())
+				log("command stream")
+
+
+				return commandSet;
+
+
+
+}
+void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
+
+	log("Entire commandset")
+	for(int i = 0; i < commandSet.size(); i++){
+		string screen = "commandset :";
+		log(screen)
+		vector<string> commandString = commandSet[i];
+		string command;
+		for(int z = 0; z < commandString.size(); z++){
+			command += commandString[z] + " ";
+		}
+		log(command)
 
 
 
 	}
-
-	return commandVector;
 }
+
 vector<vector<string> > Shell::ParseCommands(string commandStream){
 	log("parsing commands")
 
@@ -348,6 +425,10 @@ vector<vector<string> > Shell::ParseCommands(string commandStream){
 	// log the whole stream to parse the kick of the parser
 	log(commandStream)
 	commandSet = TokenizeCommandStream(commandStream);
+	log("There is a total of ")
+	log(commandSet.size())
+	log("Commands to run")
+	dumpEntireCommandVector(commandSet);
 
 	return commandSet;
 }
