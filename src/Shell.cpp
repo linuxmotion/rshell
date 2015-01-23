@@ -83,7 +83,18 @@ void Shell::PrintCommandPrompt(){
 			// clear all the tokens from the last input
 			//	Tokens.clear();
 			// Print the command line
-			printf("%s$ ", "Commands Line");
+	char * buff = new char[256];
+	char *username = new char[256];
+	string name = "unknown";
+	string host = "unknown";
+	cuserid(username);
+	if(username != NULL){
+		name = username;
+	}
+	if(!gethostname(buff, 256)){
+		host = buff;
+	}
+	printf("%s@%s$ ", name.c_str(), host.c_str() );
 	//Get the line that was entered
 
 }
