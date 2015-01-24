@@ -66,14 +66,16 @@ void Shell::StartShell(int argc, char **argv){
 		bool success = true;
 		// set initial execution status to true
 		bool doExecution = true;
+
+		bool resetExecution = false;
 		// If there was one or more commands to execute, execute them
 		if(execCommandSet.size() > 0){
-			// loop through the commands to execute
 
+			resetExecution = false;
 			int size = execCommandSet.size();
 
 			log("Looping through " + IntToString(size) + " command sets" )
-
+			// loop through the commands to execute
 			for(int execi = 0; execi < size; execi++){
 
 				log("Find exit status")
@@ -108,6 +110,33 @@ void Shell::StartShell(int argc, char **argv){
 							string no = "Not executing next command because prevois command succeeded";
 							string logs = ((doExecution == true) ? yes : no);
 							log(logs)
+
+							// if it turn out that we do not execute the next command
+							// we dont need to execute until a ; is found
+							if(!doExecution){
+								log("Finding next vector to execute")
+								for(int findNextEnd = execi; findNextEnd < size; findNextEnd++){
+									log("Checking vector " + IntToString(execi))
+									vector<string> tmp = execCommandSet[execi]; //
+									string connector = tmp[tmp.size()-1];
+									log(connector)
+									// once we find the connector, advance execi to the vector
+									// following that connector
+									if(connector.compare(";") == 0){
+										execi = (findNextEnd);
+										log("Found next ; at " + IntToString(execi))
+										// since the executin flag is false, break out
+										// of the loop and let the outer loop complete
+										// execution is phrohibited
+										resetExecution = true;
+										// break out from the loop
+										break;
+									}
+
+
+								}
+
+							}
 						}
 						if(connector.compare("&&") == 0){
 							log("Found a && connector")
@@ -128,6 +157,15 @@ void Shell::StartShell(int argc, char **argv){
 						if(!ExecuteCommand(command))
 							success = false;
 
+					}
+					// we should mark that the next command is allowed to execute
+					if(resetExecution){
+						log("Resetting execution status")
+						doExecution = true;
+						// set this status falsg to false
+						// so the executin is controlled by
+						// connectors again
+						resetExecution = false;
 					}
 					log("The execution finished: ")
 					string tmp = (success == true ? "true" : "false");
@@ -214,9 +252,8 @@ vector<vector<string> > Shell::TokenizeCommandStream(string commandStream) {
 	log("There is a total of ")
 	log(completedTokenCommands.size())
 	log("Commands to run")
-	cout << std::endl << std::endl;
 	dumpEntireCommandVector(completedTokenCommands);
-	cout << std::endl << std::endl;
+
 	return completedTokenCommands;
 
 }
@@ -343,7 +380,7 @@ vector<vector<string> > Shell::TokenizeToLogicalOR(vector<vector<string> > comma
 			char* buffer = new char[256];
 
 				for(int i = 0; i < commandVector.size(); i++){
-					log("Looping through vectors to tokenize")
+					log("Looping through vectors to ORize")
 					// loop through the connectorized vectors
 					spaceVector = commandVector[i];
 				//	for(int z = 0; z < spaceVector.size(); z++){
@@ -354,9 +391,24 @@ vector<vector<string> > Shell::TokenizeToLogicalOR(vector<vector<string> > comma
 						strcpy(buffer,spaceVector[0].c_str());
 						char* prog = strtok(buffer, "||");
 						// Put all the tokens into a vector
+						// if the string grabed no token
+						// the orignal string had no token
+						// so grab that original string
+						// and push it and go to next vector
+
+		//				if(prog == NULL){
+		//					log(buffer)
+		//					tmpVector.push_back(buffer);
+		//					commandSet.push_back(tmpVector);
+		//					tmpVector.clear();
+		//					continue;
+		//				}
+
 						do{
-							if(prog == NULL)
+							if(prog == NULL){
+
 								break;
+							}
 
 							if(prog != NULL){
 								log(prog)
@@ -371,10 +423,21 @@ vector<vector<string> > Shell::TokenizeToLogicalOR(vector<vector<string> > comma
 
 							// check to see if there is another token
 							if(prog != NULL){
-								// if there was push back anothere connector
+								// if there was push back another connector
 								log("||")
 								tmpVector.push_back("||");
+							}else{
+								// if it was NULL at this point it means
+								// that there was not another token or string
+								// add back on the original connector
+								// if there was one
+								if(spaceVector.size() > 1){
+									log(spaceVector[1])
+									tmpVector.push_back(spaceVector[1]);
+								}
+
 							}
+
 							// push this set into the larger set
 							commandSet.push_back(tmpVector);
 							// clear the tmp vector
@@ -594,7 +657,7 @@ vector<vector<string> > Shell::TokenizeToSpaces(vector<vector<string> > complete
 
 void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
 
-	cout << std::endl << std::endl;
+#ifdef DEBUG std::cout << std::endl << std::endl;
 	log("Entire commandset")
 	for(int i = 0; i < commandSet.size(); i++){
 		string screen = "commandset :";
@@ -609,7 +672,8 @@ void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
 
 
 	}
-	cout << std::endl << std::endl;
+	std::cout << std::endl << std::endl;
+#endif
 }
 
 bool isConnector(string str){
