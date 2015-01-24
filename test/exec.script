@@ -1,0 +1,462 @@
+Script started on Sat 24 Jan 2015 02:38:04 AM PST
+john@Conical-Desktop-X4:~/Workspace/CS100[exec]$ script test/exec.scriptmake clean; make; bin/rshell 
+rm -rf bin obj
+g++ -c -Wall src/CS100.cpp -o obj/CS100.o
+g++ -c -Wall src/Shell.cpp -o obj/Shell.o
+g++   obj/CS100.o obj/Shell.o  -o bin/rshell
+john@Conical-Desktop-X4$ # tre  esting command execution
+john@Conical-Desktop-X4$ ls
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+john@Conical-Desktop-X4$ ls    man
+What manual page do you want?
+john@Conical-Desktop-X4$ git
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+john@Conical-Desktop-X4$ help
+john@Conical-Desktop-X4$ # apparently help is an internal command
+john@Conical-Desktop-X4$ echo
+
+john@Conical-Desktop-X4$ man
+What manual page do you want?
+john@Conical-Desktop-X4$ ls
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+john@Conical-Desktop-X4$ ld
+ld: no input files
+john@Conical-Desktop-X4$ # testing command execution with parameters
+john@Conical-Desktop-X4$ ls -l
+total 28
+drwxrwxr-x 2 john john 4096 Jan 24 02:38 bin
+drwxrwxr-x 3 john john 4096 Jan 24 02:27 Debug
+-rw-rw-r-- 1 john john  555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john    0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john  491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john 4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john    0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john 4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john 4096 Jan 24 02:35 test
+john@Conical-Desktop-X4$ ls -la
+total 64
+drwxrwxr-x 8 john john  4096 Jan 24 02:38 .
+drwxrwxr-x 6 john john  4096 Jan 19 12:54 ..
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 bin
+-rw-rw-r-- 1 john john 12583 Jan  6 21:42 .cproject
+drwxrwxr-x 3 john john  4096 Jan 24 02:27 Debug
+drwxrwxr-x 8 john john  4096 Jan 24 02:33 .git
+-rw-rw-r-- 1 john john    42 Jan  6 21:58 .gitignore
+-rw-rw-r-- 1 john john   555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john   491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john  2473 Jan  6 21:42 .project
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john  4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john  4096 Jan 24 02:35 test
+john@Conical-Desktop-X4$ ls -l -a
+total 64
+drwxrwxr-x 8 john john  4096 Jan 24 02:38 .
+drwxrwxr-x 6 john john  4096 Jan 19 12:54 ..
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 bin
+-rw-rw-r-- 1 john john 12583 Jan  6 21:42 .cproject
+drwxrwxr-x 3 john john  4096 Jan 24 02:27 Debug
+drwxrwxr-x 8 john john  4096 Jan 24 02:33 .git
+-rw-rw-r-- 1 john john    42 Jan  6 21:58 .gitignore
+-rw-rw-r-- 1 john john   555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john   491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john  2473 Jan  6 21:42 .project
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john  4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john  4096 Jan 24 02:35 test
+john@Conical-Desktop-X4$ ls -la -a           man git
+[?1049h[?1h=GIT(1)                                                                                                      Git Manual                                                                                                     GIT(1)[m
+[m
+[1mNAME[0m[m
+       git - the stupid content tracker[m
+[m
+[1mSYNOPSIS[0m[m
+       [4mgit[24m [--version] [--help] [-C <path>] [-c <name>=<value>][m
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path][m
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare][m
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>][m
+           <command> [<args>][m
+[m
+[1mDESCRIPTION[0m[m
+       Git is a fast, scalable, distributed revision control system with an unusually rich command set that provides both high-level operations and full access to internals.[m
+[m
+       See [1mgittutorial[0m(7) to get started, then see [1mEveryday[0m [1mGit[0m[1] for a useful minimum set of commands. The [1mGit[0m [1mUser’s[0m [1mManual[0m[2] has a more in-depth introduction.[m
+[m
+       After you mastered the basic concepts, you can come back to this page to learn what commands Git offers. You can learn more about individual Git commands with "git help command". [1mgitcli[0m(7) manual page gives you an[m
+       overview of the command line command syntax.[m
+[m
+       Formatted and hyperlinked version of the latest Git documentation can be viewed at http://git-htmldocs.googlecode.com/git/git.html.[m
+[m
+[1mOPTIONS[0m[m
+       --version[m
+           Prints the Git suite version that the [4mgit[24m program came from.[m
+[m
+       --help[m
+           Prints the synopsis and a list of the most commonly used commands. If the option [4m--all[24m or [4m-a[24m is given then all available commands are printed. If a Git command is named this option will bring up the manual page for[m
+[7m Manual page git(1) line 1 (press h for help or q to quit)[27m[K[K[?1l>[?1049ljohn@Conical-Desktop-X4$ git 
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+john@Conical-Desktop-X4$ git status
+On branch exec
+Your branch is up-to-date with 'origin/exec'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	[31mmodified:   src/Shell.cpp[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	[31mtest/[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+john@Conical-Desktop-X4$ # testing , multiple command execution, no logic
+john@Conical-Desktop-X4$ ls; man
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+What manual page do you want?
+john@Conical-Desktop-X4$ ls -l   ; manl   ; git
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+What manual page do you want?
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+john@Conical-Desktop-X4$ ls; man; git; echo trur e
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+What manual page do you want?
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+true
+john@Conical-Desktop-X4$ # testing co  multiple commands with parameters, no logic
+john@Conical-Desktop-X4$ ls -la; man ; git
+total 64
+drwxrwxr-x 8 john john  4096 Jan 24 02:38 .
+drwxrwxr-x 6 john john  4096 Jan 19 12:54 ..
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 bin
+-rw-rw-r-- 1 john john 12583 Jan  6 21:42 .cproject
+drwxrwxr-x 3 john john  4096 Jan 24 02:27 Debug
+drwxrwxr-x 8 john john  4096 Jan 24 02:39 .git
+-rw-rw-r-- 1 john john    42 Jan  6 21:58 .gitignore
+-rw-rw-r-- 1 john john   555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john   491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john  2473 Jan  6 21:42 .project
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john  4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john  4096 Jan 24 02:35 test
+What manual page do you want?
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+john@Conical-Desktop-X4$ ls -l -a; man; git status; ls
+total 64
+drwxrwxr-x 8 john john  4096 Jan 24 02:38 .
+drwxrwxr-x 6 john john  4096 Jan 19 12:54 ..
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 bin
+-rw-rw-r-- 1 john john 12583 Jan  6 21:42 .cproject
+drwxrwxr-x 3 john john  4096 Jan 24 02:27 Debug
+drwxrwxr-x 8 john john  4096 Jan 24 02:39 .git
+-rw-rw-r-- 1 john john    42 Jan  6 21:58 .gitignore
+-rw-rw-r-- 1 john john   555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john   491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john  2473 Jan  6 21:42 .project
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john  4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john  4096 Jan 24 02:35 test
+What manual page do you want?
+On branch exec
+Your branch is up-to-date with 'origin/exec'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	[31mmodified:   src/Shell.cpp[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	[31mtest/[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+john@Conical-Desktop-X4$ # testing l multiple commands with OR lig  ogic
+john@Conical-Desktop-X4$ ls || man
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+john@Conical-Desktop-X4$ ls || man  || git
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+john@Conical-Desktop-X4$ ls; man || git
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+What manual page do you want?
+john@Conical-Desktop-X4$ ls ; man||git
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+What manual page do you want?
+john@Conical-Desktop-X4$ #test  ing ^[[D^[[D^[[D                     testing AND logic with multiple commands
+john@Conical-Desktop-X4$ ls && man && git
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+What manual page do you want?
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+john@Conical-Desktop-X4$ ls -la %%  && man
+total 64
+drwxrwxr-x 8 john john  4096 Jan 24 02:38 .
+drwxrwxr-x 6 john john  4096 Jan 19 12:54 ..
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 bin
+-rw-rw-r-- 1 john john 12583 Jan  6 21:42 .cproject
+drwxrwxr-x 3 john john  4096 Jan 24 02:27 Debug
+drwxrwxr-x 8 john john  4096 Jan 24 02:41 .git
+-rw-rw-r-- 1 john john    42 Jan  6 21:58 .gitignore
+-rw-rw-r-- 1 john john   555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john   491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john  2473 Jan  6 21:42 .project
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john  4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john  4096 Jan 24 02:35 test
+What manual page do you want?
+john@Conical-Desktop-X4$ ls && false && echo true
+bin  Debug  License  LICENSE  Makefile	obj  README.md	src  test
+true
+john@Conical-Desktop-X4$ # testing multip;le commands^[[D^[[D^[[D^[[D                            le commands with logic and parameter rs
+john@Conical-Desktop-X4$ ls -la; echo hello && true || echo false; git  ; man
+total 64
+drwxrwxr-x 8 john john  4096 Jan 24 02:38 .
+drwxrwxr-x 6 john john  4096 Jan 19 12:54 ..
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 bin
+-rw-rw-r-- 1 john john 12583 Jan  6 21:42 .cproject
+drwxrwxr-x 3 john john  4096 Jan 24 02:27 Debug
+drwxrwxr-x 8 john john  4096 Jan 24 02:41 .git
+-rw-rw-r-- 1 john john    42 Jan  6 21:58 .gitignore
+-rw-rw-r-- 1 john john   555 Jan 21 17:47 License
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 LICENSE
+-rw-rw-r-- 1 john john   491 Jan 19 18:54 Makefile
+drwxrwxr-x 2 john john  4096 Jan 24 02:38 obj
+-rw-rw-r-- 1 john john  2473 Jan  6 21:42 .project
+-rw-rw-r-- 1 john john     0 Jan  5 21:05 README.md
+drwxrwxr-x 2 john john  4096 Jan 24 01:36 src
+drwxrwxr-x 2 john john  4096 Jan 24 02:35 test
+hello
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   bisect     Find by binary search the change that introduced a bug
+   branch     List, create, or delete branches
+   checkout   Checkout a branch or paths to the working tree
+   clone      Clone a repository into a new directory
+   commit     Record changes to the repository
+   diff       Show changes between commits, commit and working tree, etc
+   fetch      Download objects and refs from another repository
+   grep       Print lines matching a pattern
+   init       Create an empty Git repository or reinitialize an existing one
+   log        Show commit logs
+   merge      Join two or more development histories together
+   mv         Move or rename a file, a directory, or a symlink
+   pull       Fetch from and integrate with another repository or a local branch
+   push       Update remote refs along with associated objects
+   rebase     Forward-port local commits to the updated upstream head
+   reset      Reset current HEAD to the specified state
+   rm         Remove files from the working tree and from the index
+   show       Show various types of objects
+   status     Show the working tree status
+   tag        Create, list, delete or verify a tag object signed with GPG
+
+'git help -a' and 'git help -g' lists available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+What manual page do you want?
+john@Conical-Desktop-X4$ john@Conical-Desktop-X4$ ^C
+john@Conical-Desktop-X4:~/Workspace/CS100[exec]$ exit
+
+Script done on Sat 24 Jan 2015 02:47:14 AM PST
