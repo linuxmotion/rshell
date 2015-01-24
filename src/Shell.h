@@ -27,7 +27,7 @@ public:
 
 private:
 	string mCurrentDirectory;
-	void dumpEntireCommandVector(vector<vector<string> >& commandSet);vector<vector<string> > TokenizeToConnectors(vector<vector<string> > completeStream);
+	void dumpEntireCommandVector(vector<vector<string> >& commandSet);
 	vector<vector<string> > TokenizeToSpaces(vector<vector<string> > completeStream);
 	vector<vector<string> > TokenizeToLogicalEND(string completeCommands);
 	vector<vector<string> > TokenizeToLogicalOR(vector<vector<string> > parseVector);

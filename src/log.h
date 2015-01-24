@@ -11,13 +11,16 @@
 #include <vector>
 #include <iostream>
 // Comment this out to disable debuging
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 
 using std::cout;
 using std::endl;
 using std::cerr;
+// NEVER leave this in a IF statement by itself with no braces!!!!!
+// it may wreck the compile as all occurence get replace by a space
+// meaning the if will pull the next statment as the clause
 #define log(String) \
 		cout << __FILE__ << "::"<< __FUNCTION__ << "::"<< __LINE__ << " " << String << endl;
 
