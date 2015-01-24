@@ -227,8 +227,16 @@ vector<vector<string> > Shell::ParseCommands(string commandStream){
 
 	// resize the array to remove anything after the #
 	size_t comment = commandStream.find_first_of('#');
-	if(comment != string::npos)
-		commandStream.resize(comment-1);
+	if(comment != string::npos){
+		if(comment <= 0){
+			commandStream.resize(0);
+		}else{
+
+			commandStream.resize(comment-1);
+		}
+
+
+	}
 
 	// log the whole stream to parse the kick of the parser
 	log(commandStream)
@@ -755,6 +763,12 @@ bool Shell::handleParentExecution(pid_t pid,bool wait) {
 			}
 			if (WIFEXITED(status)) {
 				log("Child exit status = " << WEXITSTATUS(status))
+			}
+			else{
+				// The child did not exit properly
+				perror("The child did not exit properly");
+				return false;
+
 			}
 		}
 		else{
