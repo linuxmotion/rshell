@@ -19,8 +19,19 @@
 using std::string;
 using std::vector;
 
-// move this to header
+// move these to a header
 vector<vector<string> > splitToVector(string completeStream, string delim);
+
+string IntToString(int num){
+
+
+	std::stringstream ss;
+	ss << num;
+	return ss.str();
+}
+
+
+
 
 Shell::Shell() {
 	// TODO Auto-generated constructor stub
@@ -51,39 +62,66 @@ void Shell::StartShell(int argc, char **argv){
 		// Clear any commands left in buffer
 		execCommandSet.clear();
 		execCommandSet = ParseCommands(commands);
-		// If there was one or more commands to execute, execute them
+		// set initial success status to true
 		bool success = true;
+		// set initial execution status to true
+		bool doExecution = true;
+		// If there was one or more commands to execute, execute them
 		if(execCommandSet.size() > 0){
 			// loop through the commands to execute
 
 			int size = execCommandSet.size();
-			for(int i = 0; i < size; i++){
+
+			log("Looping through " + IntToString(size) + " command sets" )
+
+			for(int execi = 0; execi < size; execi++){
+
 				log("Find exit status")
-				if(NeedToExit(execCommandSet[i])){
+				if(NeedToExit(execCommandSet[execi])){
 					terminate = true;
 					log("Going to exit the program")
 					break;
 				}else{
 					// Execute the command
-					vector<string> command = execCommandSet[i];
-					bool doExecution = true;
-					// if i had more than one set, was the last string a connector
-					if(i > 0){
-						string connector = command[command.size()-1];
+					log("Beginning execution phase for command " + IntToString(execi))
+					// grab the commands set to execute
+					vector<string> command = execCommandSet[execi];
+
+					// if commandSet had more than one command, was the last string
+					// on the last command a connector
+					// we should only check the connector if there is only more than one
+					// set of commands to execute
+					if(execi > 0){
+						log("Searching for a connector")
+						// Grab a ptr to the prevois vector
+						// This is why we must have more than one vector
+						vector<string> tmp = execCommandSet[execi-1]; // I really hate having to do this line
+						string connector = tmp[tmp.size()-1];
 						// if the connector was a ; execute the command
 						// if it was || execute only if the last one failed
 						// if it was a && execute if it succeded
-
 						if(connector.compare("||") == 0){
-
+							log("Found a || connector")
 							doExecution = !success;
+
+							string yes = "Will execute beacuse prevois command failed";
+							string no = "Not executing next command because prevois command succeeded";
+							string logs = ((doExecution == true) ? yes : no);
+							log(logs)
 						}
 						if(connector.compare("&&") == 0){
-
+							log("Found a && connector")
 							doExecution = success;
+							string yes = "Will execute beacuse prevois command succeded";
+							string no = "Not executing next command because prevois command failed";
+							string logs = ((doExecution == true) ? yes : no);
+							log(logs)
+
+
 						}
 
 					}
+
 
 					if(doExecution){
 						log("Will execute a command")
@@ -554,13 +592,6 @@ vector<vector<string> > Shell::TokenizeToSpaces(vector<vector<string> > complete
 
 }
 
-string IntToString(int num){
-
-
-	std::stringstream ss;
-	ss << num;
-	return ss.str();
-}
 void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
 
 	cout << std::endl << std::endl;
@@ -588,50 +619,50 @@ bool isConnector(string str){
 	}
 	return false;
 }
-void Shell::handleChildExecution(vector<string> command) {
+
+// Accepts a command vector
+// commands are in the form
+// [command] [flag] --- [flag] [connector]
+void Shell::handleChildExecution(vector<string> commandVector) {
+
+	vector<string> command = commandVector;
 	log("Executing child process")
-	int size = command.size()+1;
+	int size = command.size();
 	log(size)
 	log("commands Found")
-	char** argv = new char*[size];
+	// Create an array 1 great than size of commandVector
+	char** argv = new char*[size+1];
+	for(int i = 0; i < size; i++){
+			// create new empty array
+			argv[i] = new char;
+	}
 
 	// Null the last command
-	argv[size-1] = NULL;
+	argv[size] = NULL;
 
-	char* str;
-	log("Deep copy paramaters")
-	for(int i = 0; i < size-1; i++ ){
-		//log(command[i].c_str())
-		str = new char[256];
-		if(command[i] == " "){
+	log("Deep copy parameters")
+	for(int i = 0; i < size; i++ ){
+		log("Copying command " + IntToString(i))
+
+		string scommand = command[i];
+		log(scommand)
+		if(isConnector(scommand)){
 			argv[i] = NULL;
 			log("NULL")
+		}else{
+			log("about to copy string")
+			char *str = new char;
+			strcpy(str,scommand.c_str());
+			log(str);
+			argv[i] = str;
+			log(argv[i]);
+			//strcpy(argvi)
 		}
-		else{
-			strcpy(str,command[i].c_str());
-			argv[i] = new char;
-			if(isConnector(command[i])){
-				argv[i] = NULL;
-				log("NULL")
-			}else{
-
-				strcpy(argv[i],str);
-				log(str);
-			}
-		}
-
-
-
-		// Clear the string
-		strcpy(str,"");
-
-		str = 0;
-		delete str;
-
 	}
+
 	log("About to dump commands")
     // Last command is always NULL
-	dumpCommands(argv, size);
+	dumpCommands(argv, size-1);
 
 	log("Executing: ")
 	log(argv[0]);
