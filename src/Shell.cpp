@@ -226,7 +226,7 @@ vector<vector<string> > Shell::ParseCommands(string commandStream){
 		return commandSet;
 
 	// resize the array to remove anything after the #
-	int comment = commandStream.find_first_of('#');
+	size_t comment = commandStream.find_first_of('#');
 	if(comment != string::npos)
 		commandStream.resize(comment-1);
 
@@ -379,7 +379,7 @@ vector<vector<string> > Shell::TokenizeToLogicalOR(vector<vector<string> > comma
 			vector<vector<string> > commandSet;
 			char* buffer = new char[256];
 
-				for(int i = 0; i < commandVector.size(); i++){
+				for(unsigned int i = 0; i < commandVector.size(); i++){
 					log("Looping through vectors to ORize")
 					// loop through the connectorized vectors
 					spaceVector = commandVector[i];
@@ -486,7 +486,7 @@ vector<vector<string> > Shell::TokenizeToLogicalAND(vector<vector<string> > pars
 	vector<vector<string> > commandSet;
 	char* buffer;
 
-		for(int i = 0; i < parseVector.size(); i++){
+		for(unsigned int i = 0; i < parseVector.size(); i++){
 			log("Looping through vectors to ANDerize")
 			// loop through the connectorized vectors
 			spaceVector = parseVector[i];
@@ -593,7 +593,7 @@ vector<vector<string> > Shell::TokenizeToSpaces(vector<vector<string> > complete
 	vector<vector<string> > commandSet;
 	char* buffer = new char[256];
 
-	for(int i = 0; i < completeStream.size(); i++){
+	for(unsigned int i = 0; i < completeStream.size(); i++){
 		log("Looping through vectors to spacerize")
 		// Grab the vector to tokenize by space
 		spaceVector = completeStream[i];
@@ -657,7 +657,8 @@ vector<vector<string> > Shell::TokenizeToSpaces(vector<vector<string> > complete
 
 void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
 
-#ifdef DEBUG std::cout << std::endl << std::endl;
+#ifdef DEBUG
+	std::cout << std::endl << std::endl;
 	log("Entire commandset")
 	for(int i = 0; i < commandSet.size(); i++){
 		string screen = "commandset :";
