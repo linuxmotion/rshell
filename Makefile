@@ -39,6 +39,9 @@ obj/Ls.o:src/Ls.cpp
 install:
 	@mkdir -p ~/bin
 	mv bin/* ~/bin/
+	
+uninstall:
+	rm ~/bin/ls ~/bin/rshell 
 		
 	
 clean:
