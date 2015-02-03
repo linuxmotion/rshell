@@ -36,5 +36,10 @@ obj/Ls.o:src/Ls.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 	
+install:
+	@mkdir -p ~/bin
+	mv bin/* ~/bin/
+		
+	
 clean:
 	rm -rf bin obj
