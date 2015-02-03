@@ -14,12 +14,35 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <vector>
+#include <dirent.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
+#include <list>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using std::string;
 using std::vector;
 
 #define VERSION 1
 #define NAME    "Mako"
+
+#define printusrperm(stats) \
+	printf("%c%c%c",  ((stats.st_mode & S_IRUSR)?'r':'-'),\
+					  ((stats.st_mode & S_IWUSR)?'w':'-'),\
+					  ((stats.st_mode & S_IXUSR)?'x':'-'));
+
+
+#define printgrpperm(stats) \
+		printf("%c%c%c",  ((stats.st_mode & S_IRGRP)?'r':'-'),\
+						  ((stats.st_mode & S_IWGRP)?'w':'-'),\
+						  ((stats.st_mode & S_IXGRP)?'x':'-'));
+
+#define printothperm(stats) \
+		printf("%c%c%c",  ((stats.st_mode & S_IROTH)?'r':'-'),\
+						  ((stats.st_mode & S_IWOTH)?'w':'-'),\
+						  ((stats.st_mode & S_IXOTH)?'x':'-'));
 
 class Lslib {
 
@@ -136,18 +159,92 @@ private:
 	bool ALL_RECORDS = false;
 		// call ls on the given directory
 		// can be realative or absolute
-		void call_ls(string path){
+	void call_ls(string path){
+		std::list<string> SavedDirs;
 
-			printf("calling %s \n", path.c_str());
-			// hmm for some reason our cwd
-			// could not be found
 			if(path == ""){
 
 				return;
 			}
+			//printf("Path %s \n", path.c_str());
+			// hmm for some reason our cwd
+			// could not be found
 
+
+			//printf("About to open dir \n");
+
+			DIR * dirp = openDir(path);
+
+			if(dirp == NULL)
+				return;
+			//rintf("Directory opened succesfully\n");
+			struct dirent *dent;
+
+			//printf("about to read dir\n");
+			while((dent = readdir(dirp))){
+
+				//printf("About to Display entry\n");
+				displayEntry(dent, path); // display the entry
+
+
+				if(dent->d_type == DT_DIR){
+					if((string(dent->d_name) == ".") || (string(dent->d_name) == "..")){
+						continue;
+					}
+					SavedDirs.push_back(dent->d_name);
+
+
+
+			}
 
 		}
+
+
+	}
+
+
+			void displayEntry(struct dirent* entry, string root){
+
+				//printf("Displaying entry");
+				if((string(entry->d_name) == ".")|| (string(entry->d_name) == "..")){
+					//	return;
+				}
+
+				struct stat stats;
+				string tmp = root  + "/"+ entry->d_name;
+				lstat(tmp.c_str(), &stats);
+				struct passwd *user = getpwuid(stats.st_uid);
+				struct group * grp  = getgrgid(stats.st_gid);
+				printf("%c", ((entry->d_type == DT_DIR) ? 'd' : ((entry->d_type == DT_LNK) ? 'l' : '-')));
+				// Defined by Macro's above to save function athstetics
+				printusrperm(stats);
+				printgrpperm(stats);
+				printothperm(stats);
+				printf(" %2d", int(stats.st_nlink));
+				printf(" %s %s " , user->pw_name, grp->gr_name);//<< ;
+				printf(" %6d", int(stats.st_size));
+				tm *time = localtime(&stats.st_atim.tv_sec);
+				// Unix time starts in 1900
+				printf(" %d-%.2d-%.2d", time->tm_year+1900, time->tm_mon + 1, time->tm_mday);
+				printf(" %d:%.2d",time->tm_hour, time->tm_min);
+				printf(" %-10s\n", entry->d_name);
+
+
+			}
+
+		DIR * openDir(string path){
+
+			//TODO: Use error checking, dummy for now
+
+			return opendir(path.c_str());
+
+		}
+
+
+
+
+
+
 
 };
 

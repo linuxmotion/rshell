@@ -17,7 +17,7 @@ void print_information();
 
 int main(int argc, char* argv[]) {
 
-	print_information();
+	//print_information();
 
 	Lslib ls;
 
