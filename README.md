@@ -1,11 +1,21 @@
 ### RSHell
 
+## Has two programs made durring compilation
+    rshell
+    ls
+    
+#ls
+    make ls
+    bin/ls
 
-# Install
-make
-bin/rshell
+#rshell
+    make rshell
+    bin/rshell
+
+
+running 'make all' make both programs
 
 
 # Features
-  Takes comments if after \#
+  Takes comments after \# 
   Any strings after the \# sign will be ignored
