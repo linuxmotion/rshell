@@ -7,6 +7,8 @@ OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=rshell
 
 all: $(SOURCES) $(EXECUTABLE) ls
+debug: LDFLAGS += -g
+debug: all
 	
 $(EXECUTABLE): obj/CS100.o obj/Shell.o 
 	@mkdir -p bin 
