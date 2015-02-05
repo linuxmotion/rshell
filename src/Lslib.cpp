@@ -6,6 +6,13 @@
  */
 
 #include "Lslib.h"
+#include "DirUtils.h"
+#include <stdio.h>
+#include <vector>
+#include <string>
+
+using std::string;
+using std::vector;
 
 Lslib::Lslib() {
 	// TODO Auto-generated constructor stub
@@ -13,7 +20,7 @@ Lslib::Lslib() {
 
 // Calls ls on the current directory
 void  Lslib::call_ls(int argc, char* argv[]){
-	printf("Calling ls\n");
+	//printf("Calling ls\n");
 	// parse the arguments
 	vector<string> args;
 	for(int i =1 ; i < argc; i++){
@@ -21,7 +28,7 @@ void  Lslib::call_ls(int argc, char* argv[]){
 	}
 	set_arguments(args);
 
-	call_ls(get_cwd());
+	call_ls(DirUtils::get_cwd());
 
 }
 
@@ -32,7 +39,7 @@ void  Lslib::setFlag(char c){
 }
 
 void  Lslib::set_arguments(vector<string> args){
-	printf("Parsing the command line arguments\n");
+	//printf("Parsing the command line arguments\n");
 
 	for(int i = 0; i < args.size(); i++){
 
@@ -62,59 +69,27 @@ void  Lslib::set_arguments(vector<string> args){
 
 }
 
-string  Lslib::get_cwd(){
+#include <algorithm>
 
-	// This memory needs to be freed
-	char * dirName = get_current_dir_name();
-	if(dirName == NULL){
+bool startsWithDot(string name){
 
-		switch(errno){
-			case EACCES:{
-				printf("Insufficient permissions\n");
-				break;
-			}
-			case EFAULT:{
-				printf("Allocation error\n");
-				break;
-			}
-			case EINVAL:{
-				printf("A space has been allocated but there is no name\n");
-				break;
-			}
 
-			case ENOENT:{
-				printf("The current working directory has been unlinked\n");
-				break;
-			}
-			case ERANGE:{
-				printf("Array size to small, allocate a larger array\n");
-				break;
-			}
-		}
+	if(name[0] == '.')
+		return true;
 
-		// in any case just return a blank dir name
-		return "";
-	}
-	// grab the string, let the string class
-	// manage the memory now
-	string sdirName = dirName;
-	// free that initial memory
-	// so we dont lose it
-	free(dirName);
-	return sdirName;
-}
-string  Lslib::tildeExpansion(){
-	return string(getenv("HOME")) + "/";
+	return false;
+
 }
 
 // call ls on the given directory
 // can be realative or absolute
+#include <iostream>
 bool  Lslib::call_ls(string path){
-	std::list<string> SavedDirs;
+	vector<DirUtils::DirectoryEntry> SavedDirs;
 
 		if(path == ""){
 
-			path = ".";
+			return false;
 		}
 		//printf("Path %s \n", path.c_str());
 		// hmm for some reason our cwd
@@ -127,56 +102,109 @@ bool  Lslib::call_ls(string path){
 
 		if(dirp == NULL)
 			return false;
-		//rintf("Directory opened succesfully\n");
+		//printf("Directory opened succesfully\n");
 		struct dirent *dent;
 
 		//printf("about to read dir\n");
+		int h = 0;
+		int size = 0;
 		while((dent = readdir(dirp))){
 
-			//printf("About to Display entry\n");
-			displayEntry(dent, path); // display the entry
-
-			if(dent->d_type == DT_DIR){
-				if((string(dent->d_name) == ".") || (string(dent->d_name) == "..")){
-					continue;
-				}
-				SavedDirs.push_back(dent->d_name);
-			}
-		// need to free dirp
-		// it should be open at this time
+			SavedDirs.push_back(DirUtils::extractDisplayData(dent, path));
+			size += SavedDirs[h++].mFileSize;
 
 		}
+
+
+
+		std::sort( SavedDirs.begin(), SavedDirs.end(), cmpByName() );
+		//printf("%d \n", size/1024);
 		closeDir(dirp);
+		// displayt the entry
+		for(int i = 0; i < SavedDirs.size(); i++){
+			bool isdot = (SavedDirs[i].mName[0] == '.') ? true : false ;
+			//std::cout << isdot << std::endl;
+			if(isdot){
+				if(this->ALL_RECORDS){
+					if(this->LONG_FORMAT){
+						displayLongEntry(SavedDirs[i]);
+					}else {
+						displayEntry(SavedDirs[i]);
+
+					}
+				}
+
+			}else{
+				if(this->LONG_FORMAT){
+					displayLongEntry(SavedDirs[i]);
+				}else {
+					displayEntry(SavedDirs[i]);
+
+				}
+			}
+
+		}
+
+		printf("\n");
+		// if tyhe -r flag is set recurse
+		if(this->RECURSIVE_LIST){
+			for(int i = 0; i < SavedDirs.size(); i++){
+
+				if((SavedDirs[i].mName == ".") || (SavedDirs[i].mName == ".."))
+					continue;
+
+				if(SavedDirs[i].mDirType == "d"){
+					printf("\n\n");
+					call_ls(path + "/" + SavedDirs[i].mName);
+				}
+			}
+
+		}
+
 		return true;
 
 }
 
+#include <time.h>
 
-		void  Lslib::displayEntry(struct dirent* entry, string root){
+string getMonthName(int month){
+	string months[] = {"Jan", "Feb", "Mar", "Apr", "May",
+	                       "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-			//printf("Displaying entry");
-			if((string(entry->d_name) == ".")|| (string(entry->d_name) == "..")){
-				//	return;
-			}
+	if(month < 0 || month > 11)
+		return "";
 
-			struct stat stats;
-			string tmp = root  + "/"+ entry->d_name;
-			lstat(tmp.c_str(), &stats);
-			struct passwd *user = getpwuid(stats.st_uid);
-			struct group * grp  = getgrgid(stats.st_gid);
-			printf("%c", ((entry->d_type == DT_DIR) ? 'd' : ((entry->d_type == DT_LNK) ? 'l' : '-')));
-			// Defined by Macro's above to save function athstetics
-			printusrperm(stats);
-			printgrpperm(stats);
-			printothperm(stats);
-			printf(" %2d", int(stats.st_nlink));
-			printf(" %s %s " , user->pw_name, grp->gr_name);//<< ;
-			printf(" %6d", int(stats.st_size));
-			tm *time = localtime(&stats.st_atim.tv_sec);
+	return months[month];
+
+
+}
+		void  Lslib::displayLongEntry(DirUtils::DirectoryEntry entry){
+
+			printf("%s", entry.mDirType.c_str());
+			printf("%3s%3s%s", entry.mUsrPerm.c_str(), entry.mGrpPerm.c_str() , entry.mOtherPerm.c_str() );
+			printf("%2d ", entry.mNumLink);
+
+			//intf(" %2d", int(stats.st_nlink));
+			//printf(" %2d", int(stats.st_nlink));
+			printf("%s %s " , entry.mUserName.c_str(), entry.mGroupName.c_str());//<< ;
+			printf("%6d ", entry.mFileSize);
+
+			tm *time = localtime(&entry.mLastAccesTime);
+
 			// Unix time starts in 1900
-			printf(" %d-%.2d-%.2d", time->tm_year+1900, time->tm_mon + 1, time->tm_mday);
-			printf(" %d:%.2d",time->tm_hour, time->tm_min);
-			printf(" %-10s\n", entry->d_name);
+			//printf("%s:%s", time->tm_hour, time->tm_min);
+			printf(" %2s %d ", getMonthName(time->tm_mon).c_str(), time->tm_mday);
+			printf("%d:%.2d ",time->tm_hour, time->tm_min);
+			printf( "%-10s\n", entry.mName.c_str());
+
+
+
+		}
+
+
+		void  Lslib::displayEntry(DirUtils::DirectoryEntry entry){
+
+			printf("%s ", entry.mName.c_str());
 
 
 		}

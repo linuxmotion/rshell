@@ -30,11 +30,16 @@ obj/log.o:src/log.cpp
 ls:obj/Lslib.o obj/Ls.o
 	$(CC)  $(LDFLAGS) obj/Lslib.o obj/Ls.o -o bin/$@
 	
-obj/Lslib.o:src/Lslib.cpp 
+obj/Lslib.o:src/Lslib.cpp src/DirUtils.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 
 obj/Ls.o:src/Ls.cpp 
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS) $< -o $@
+	
+	
+obj/DirUtils.o:src/DirUtils.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 	
