@@ -200,7 +200,7 @@ bool  Lslib::call_ls(string path){
 
 		}
 
-		//printf("\n");
+		if(!LONG_FORMAT)printf("\n");
 		// if tyhe -r flag is set recurse
 		if(this->RECURSIVE_LIST){
 			for(unsigned int i = 0; i < SavedDirs.size(); i++){
@@ -259,9 +259,16 @@ string getMonthName(int month){
 				// executable in green
 				// hidden files with grey
 				if(entry.mDirType == "d"){
-					printf("%s%s%-10s%s\n", KBRHT, KBLU, entry.mName.c_str(), KNRM);
+
+					if(entry.mName[0] == '.'){
+						printf("%s%s%s%-10s%s%s\n", KBRHT, KGRY, KBLU, entry.mName.c_str(), KNRM, KBNRM);
+					}
+					else{
+						printf("%s%s%-10s%s\n", KBRHT, KBLU, entry.mName.c_str(), KNRM);
+					}
+
 				}else if(entry.mName[0] == '.'){
-					printf("%s%s%-10s%s\n", KBRHT, KGRY, entry.mName.c_str(), KNRM);
+					printf("%s%s%-10s%s%s\n", KBNRM, KGRY, entry.mName.c_str(), KNRM, KBNRM);
 				}else if((entry.mGrpPerm[2] == 'x') ||(entry.mOtherPerm[2] == 'x') ||(entry.mUsrPerm[2] == 'x') ){
 
 					printf("%s%s%-10s%s\n", KBRHT,KGRN, entry.mName.c_str(), KNRM);
@@ -287,13 +294,16 @@ string getMonthName(int month){
 				// executable in green
 				// hidden files with grey
 				if(entry.mDirType == "d"){
-					printf("%s%s%s%s ", KBRHT, KBLU, entry.mName.c_str(), KNRM);
+					if(entry.mName[0] == '.'){
+						printf("%s%s%s%s%s%s ", KBRHT, KGRY, KBLU, entry.mName.c_str(), KNRM, KBNRM);
+					}
+					else{
+						printf("%s%s%s%s ", KBRHT, KBLU, entry.mName.c_str(), KNRM);
+					}
 				}else if(entry.mName[0] == '.'){
-					printf("%s%s%s%s ", KBRHT, KGRY, entry.mName.c_str(), KNRM);
+					printf("%s%s%s%s%s ", KBNRM, KGRY, entry.mName.c_str(), KNRM, KBNRM);
 				}else if((entry.mGrpPerm[2] == 'x') ||(entry.mOtherPerm[2] == 'x') ||(entry.mUsrPerm[2] == 'x') ){
-
 					printf("%s%s%s%s ", KBRHT,KGRN, entry.mName.c_str(), KNRM);
-
 				}
 				else
 					printf("%s ", entry.mName.c_str());

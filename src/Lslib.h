@@ -23,9 +23,10 @@ using std::vector;
 
 
 #define KNRM  "\x1B[0m"
+#define KBNRM  "\x1B[49m"
 #define KGRN  "\x1B[32m"
 #define KBLU  "\x1B[34m"
-#define KGRY  "\x1B[38m"
+#define KGRY  "\x1B[47m"
 #define KBRHT "\x1B[1m"
 
 class Lslib {
