@@ -88,6 +88,10 @@ void  Lslib::set_arguments(vector<string> args){
 		}
 		else{
 
+			if(args[i].size() == 1){
+				// Push back just the -
+				mCurrentDirectory.push_back(args[i]);
+			}
 			//printf("Found a switch %s \n", args[i].c_str());
 			// strip the -
 
@@ -342,7 +346,7 @@ string getMonthName(int month){
 					break;
 				}
 				case ENOENT:{
-					printf("Directory does not exist\n");
+					printf("Directory does not exist %s\n", path.c_str());
 					break;
 				}
 				case ENOMEM:{
