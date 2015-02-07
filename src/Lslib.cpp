@@ -9,6 +9,7 @@
 #include "DirUtils.h"
 #include <stdio.h>
 #include <vector>
+#include <error.h>
 #include <string>
 
 using std::string;
@@ -146,11 +147,15 @@ bool  Lslib::call_ls(string path){
 		//printf("about to read dir\n");
 		int h = 0;
 		int size = 0;
+		errno = 0;
 		while((dent = readdir(dirp))){
 
 			SavedDirs.push_back(DirUtils::extractDisplayData(dent, path));
 			size += SavedDirs[h++].mFileSize;
 
+		}
+		if(errno != 0){
+			perror("an error occured while reading dir");
 		}
 
 
