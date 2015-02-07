@@ -10,6 +10,7 @@
 
 #include <string>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <pwd.h>
 #include <grp.h>
 #include <error.h>
@@ -82,6 +83,7 @@ struct DirectoryEntry{
 	string mUsrPerm;
 	string mGrpPerm;
 	string mOtherPerm;
+	blkcnt_t    mBlocks;
 	int mNumLink;
 	__time_t mLastAccesTime;
 	int mFileSize;
@@ -108,6 +110,7 @@ static DirectoryEntry  extractDisplayData(struct dirent* entry, string root){
 
 			struct passwd *user = getpwuid(stats.st_uid);
 			struct group * grp  = getgrgid(stats.st_gid);
+			Entry.mBlocks = stats.st_blocks;
 			Entry.mDirType = ((entry->d_type == DT_DIR) ? 'd' : ((entry->d_type == DT_LNK) ? 'l' : '-'));
 			Entry.mUsrPerm = ((stats.st_mode & S_IRUSR)?'r':'-');
 			Entry.mUsrPerm += ((stats.st_mode & S_IWUSR)?'w':'-');

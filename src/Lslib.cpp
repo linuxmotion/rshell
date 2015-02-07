@@ -159,6 +159,23 @@ bool  Lslib::call_ls(string path){
 		//printf("%d \n", size/1024);
 		closeDir(dirp);
 		// displayt the entry
+		long int blk = 0;
+		for(unsigned int i = 0; i < SavedDirs.size(); i++){
+			//printf("%i:%lu\n",i,long(SavedDirs[i].mBlocks/2));
+			if(!ALL_RECORDS){
+				bool isdot = (SavedDirs[i].mName[0] == '.') ? true : false ;
+				if(isdot)
+					continue;
+
+			}
+			blk += (long(SavedDirs[i].mBlocks)/2);
+		}
+
+		if(LONG_FORMAT)
+			printf("Total %li\n", blk);
+//		if(RECURSIVE_LIST)
+//			printf("\n\n./%s\n", path.mName.c_str());
+
 		for(unsigned int i = 0; i < SavedDirs.size(); i++){
 			bool isdot = (SavedDirs[i].mName[0] == '.') ? true : false ;
 			//std::cout << isdot << std::endl;
@@ -183,7 +200,7 @@ bool  Lslib::call_ls(string path){
 
 		}
 
-		printf("\n");
+		//printf("\n");
 		// if tyhe -r flag is set recurse
 		if(this->RECURSIVE_LIST){
 			for(unsigned int i = 0; i < SavedDirs.size(); i++){
@@ -192,7 +209,7 @@ bool  Lslib::call_ls(string path){
 					continue;
 
 				if(SavedDirs[i].mDirType == "d"){
-					printf("\n\n");
+					printf("\n\n./%s\n", SavedDirs[i].mName.c_str());
 					call_ls(path + "/" + SavedDirs[i].mName);
 				}
 			}
