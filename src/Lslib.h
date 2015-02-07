@@ -21,6 +21,13 @@ using std::vector;
 #define NAME    "Mako"
 
 
+
+#define KNRM  "\x1B[0m"
+#define KGRN  "\x1B[32m"
+#define KBLU  "\x1B[34m"
+#define KGRY  "\x1B[38m"
+#define KBRHT "\x1B[1m"
+
 class Lslib {
 
 public:
@@ -44,7 +51,7 @@ private:
 			};
 
 
-	string mCurrentDirectory;
+	vector<string> mCurrentDirectory;
 
 
 	bool LONG_FORMAT;

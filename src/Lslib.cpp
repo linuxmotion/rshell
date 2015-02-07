@@ -28,7 +28,19 @@ void  Lslib::call_ls(int argc, char* argv[]){
 	}
 	set_arguments(args);
 
-	call_ls(DirUtils::get_cwd());
+
+	// If the string was empty
+	// use the call location as the path
+	if(mCurrentDirectory.empty())
+		mCurrentDirectory.push_back(DirUtils::get_cwd());
+
+	string path;
+	for(unsigned int i = 0; i < mCurrentDirectory.size(); i++){
+		path = mCurrentDirectory[i];
+		call_ls(path);
+
+	}
+
 
 }
 
@@ -66,7 +78,12 @@ void  Lslib::set_arguments(vector<string> args){
 		std::size_t pos =  args[i].find('-');
 		if(pos > 0){
 			// - was not the first character
-			printf("Syntax Error: Unrecognized flag: %s ignoring \n", args[i].c_str());
+			// This was probably a directory to list
+
+			// if the directory to list hasnt been set.
+			// if(mCurrentDirectory.empty())
+			// Add it to list to 'list'
+			mCurrentDirectory.push_back(args[i]);
 		}
 		else{
 
@@ -201,6 +218,9 @@ string getMonthName(int month){
 }
 		void  Lslib::displayLongEntry(DirUtils::DirectoryEntry entry){
 
+
+
+
 			printf("%s", entry.mDirType.c_str());
 			printf("%3s%3s%s", entry.mUsrPerm.c_str(), entry.mGrpPerm.c_str() , entry.mOtherPerm.c_str() );
 			printf("%2d ", entry.mNumLink);
@@ -216,7 +236,27 @@ string getMonthName(int month){
 			//printf("%s:%s", time->tm_hour, time->tm_min);
 			printf(" %2s %d ", getMonthName(time->tm_mon).c_str(), time->tm_mday);
 			printf("%d:%.2d ",time->tm_hour, time->tm_min);
-			printf( "%-10s\n", entry.mName.c_str());
+
+			if(this->ALL_RECORDS){
+				// print Dir in blue
+				// executable in green
+				// hidden files with grey
+				if(entry.mDirType == "d"){
+					printf("%s%s%-10s%s\n", KBRHT, KBLU, entry.mName.c_str(), KNRM);
+				}else if(entry.mName[0] == '.'){
+					printf("%s%s%-10s%s\n", KBRHT, KGRY, entry.mName.c_str(), KNRM);
+				}else if((entry.mGrpPerm[2] == 'x') ||(entry.mOtherPerm[2] == 'x') ||(entry.mUsrPerm[2] == 'x') ){
+
+					printf("%s%s%-10s%s\n", KBRHT,KGRN, entry.mName.c_str(), KNRM);
+
+				}
+				else
+					printf("%-10s\n", entry.mName.c_str());
+
+			}
+			else{ // just print the entry
+				printf( "%-10s\n", entry.mName.c_str());
+			}
 
 
 
@@ -225,7 +265,25 @@ string getMonthName(int month){
 
 		void  Lslib::displayEntry(DirUtils::DirectoryEntry entry){
 
-			printf("%s ", entry.mName.c_str());
+			if(this->ALL_RECORDS){
+				// print Dir in blue
+				// executable in green
+				// hidden files with grey
+				if(entry.mDirType == "d"){
+					printf("%s%s%s%s ", KBRHT, KBLU, entry.mName.c_str(), KNRM);
+				}else if(entry.mName[0] == '.'){
+					printf("%s%s%s%s ", KBRHT, KGRY, entry.mName.c_str(), KNRM);
+				}else if((entry.mGrpPerm[2] == 'x') ||(entry.mOtherPerm[2] == 'x') ||(entry.mUsrPerm[2] == 'x') ){
+
+					printf("%s%s%s%s ", KBRHT,KGRN, entry.mName.c_str(), KNRM);
+
+				}
+				else
+					printf("%s ", entry.mName.c_str());
+
+			}
+			else // just print the entry
+				printf("%s ", entry.mName.c_str());
 
 
 		}
@@ -234,11 +292,41 @@ string getMonthName(int month){
 
 		//TODO: Use error checking, dummy for now
 
+		DIR* dirp = opendir(path.c_str());
+		if(dirp == NULL){
+			perror("OpenDir failed");
 
+			switch(errno){
+				case EACCES:{
+					printf("Insufficient permissions\n");
+					break;
+				}
+				case EBADF:{
+					printf("Invalid file descriptor\n");
+					break;
+				}
+				case ENFILE:{
+					printf("To many open files\n");
+					break;
+				}
+				case ENOENT:{
+					printf("Directory does not exist\n");
+					break;
+				}
+				case ENOMEM:{
+					printf("Not enough memory\n");
+					break;
+				}
+				case ENOTDIR:{
+					printf("Not a directory\n");
+					break;
+				}
+			}
+		}
 
-		return opendir(path.c_str());
-
+		return dirp;
 	}
+
 
 
 
@@ -246,9 +334,12 @@ string getMonthName(int month){
 	bool Lslib::closeDir(DIR * dirp){
 
 		//TODO: Use error checking, dummy for now
+		bool closed = (closedir(dirp) == 0);
+		if(!closed){
+			perror("Invalid directory stream descriptor");
+		}
 
-
-		return closedir(dirp) == 0;
+		return closed;
 
 	}
 
