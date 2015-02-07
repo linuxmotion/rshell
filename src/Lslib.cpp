@@ -14,9 +14,9 @@
 using std::string;
 using std::vector;
 
-Lslib::Lslib() {
-	// TODO Auto-generated constructor stub
-}
+Lslib::Lslib():LONG_FORMAT(false),RECURSIVE_LIST(false),
+		ALL_RECORDS(false) {
+	}
 
 // Calls ls on the current directory
 void  Lslib::call_ls(int argc, char* argv[]){
@@ -34,27 +34,48 @@ void  Lslib::call_ls(int argc, char* argv[]){
 
 
 void  Lslib::setFlag(char c){
-	printf("TODO: Set the status flasgs\n");
+
+	switch(c){
+		case LONG:{
+			this->LONG_FORMAT = true;
+		}
+		break;
+		case ALL:{
+			this->ALL_RECORDS= true;
+		}
+		break;
+		case RECURSIVE:{
+			this->RECURSIVE_LIST = true;
+		}
+		break;
+		default:{
+			// Do nothing not a flag
+		}
+		break;
+
+	}
+
 
 }
 
 void  Lslib::set_arguments(vector<string> args){
 	//printf("Parsing the command line arguments\n");
 
-	for(int i = 0; i < args.size(); i++){
+	for(unsigned int i = 0; i < args.size(); i++){
 
 		std::size_t pos =  args[i].find('-');
-		if(pos > 1){
+		if(pos > 0){
 			// - was not the first character
-			printf("Found a path %s \n", args[i].c_str());
+			printf("Syntax Error: Unrecognized flag: %s ignoring \n", args[i].c_str());
 		}
 		else{
-			printf("Found a switch %s \n", args[i].c_str());
+
+			//printf("Found a switch %s \n", args[i].c_str());
 			// strip the -
 
 			// iterate through the string to grab the
 			// switches, each char is a diff switch
-			for(int z = 1; z < args[i].size(); z++){
+			for(unsigned int z = 1; z < args[i].size(); z++){
 
 				char c = args[i][z];
 				// set the flag for this character
@@ -121,7 +142,7 @@ bool  Lslib::call_ls(string path){
 		//printf("%d \n", size/1024);
 		closeDir(dirp);
 		// displayt the entry
-		for(int i = 0; i < SavedDirs.size(); i++){
+		for(unsigned int i = 0; i < SavedDirs.size(); i++){
 			bool isdot = (SavedDirs[i].mName[0] == '.') ? true : false ;
 			//std::cout << isdot << std::endl;
 			if(isdot){
@@ -148,7 +169,7 @@ bool  Lslib::call_ls(string path){
 		printf("\n");
 		// if tyhe -r flag is set recurse
 		if(this->RECURSIVE_LIST){
-			for(int i = 0; i < SavedDirs.size(); i++){
+			for(unsigned int i = 0; i < SavedDirs.size(); i++){
 
 				if((SavedDirs[i].mName == ".") || (SavedDirs[i].mName == ".."))
 					continue;

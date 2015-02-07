@@ -30,6 +30,11 @@ public:
 	void call_ls(int argc, char* argv[]);
 	virtual ~Lslib();
 
+	const static char RECURSIVE = 'R';
+	const static char LONG = 'l';
+	const static char ALL = 'a';
+
+
 private:
 
 	struct   cmpByName{
@@ -40,10 +45,11 @@ private:
 
 
 	string mCurrentDirectory;
-	const string HOME_DIR = "~/";
-	bool LONG_FORMAT = false;
-	bool RECURSIVE_LIST = false;
-	bool ALL_RECORDS = false;
+
+
+	bool LONG_FORMAT;
+	bool RECURSIVE_LIST;
+	bool ALL_RECORDS;
 
 	void setFlag(char c);
 	void set_arguments(vector<string> args);
