@@ -121,10 +121,6 @@ void cp(const char *srcpath,const char *dstpath,int tflag){
     long bytes_read;
     long bytes_write;
     
-    //time.h
-    clock_t start, finish;
-    double   duration;
-    
     
     char temp[1000];
     char temppath[1000];
