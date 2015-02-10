@@ -125,14 +125,24 @@ void cp(const char *srcpath,const char *dstpath,int tflag){
     char temp[1000];
     char temppath[1000];
     struct stat s;
-    char *p = strrchr(srcpath, '/');
+    char _srcpath[256];
+    strcpy(_srcpath, srcpath);
+    printf("%s\n",_srcpath);
+    char *p = strrchr(_srcpath, '/');
+    if(p == NULL){
+        printf("pointer empty");
+        p = _srcpath;
+    }
+    else{
+       p++;
+    }
     if(stat(srcpath,&s)==-1)
     {
         perror("error in stat:");
         return;
     }
-    p++;
-    strcpy(srcname,(char*)p);
+    
+    strcpy(srcname,p);
     
     
     
@@ -329,7 +339,7 @@ void cp(const char *srcpath,const char *dstpath,int tflag){
     return;
 }
 
-int main(int argc, const char *argv[]){
+int main(int argc,const char *argv[]){
     //const char *argv[3]={"/Users/Elvis/Documents/UCR\ /CS\ 100/lab/lab5-cp/cp.cpp","/Users/Elvis/Desktop/cp","-t"};
     //int argc=3;
     /* lasting time*/
