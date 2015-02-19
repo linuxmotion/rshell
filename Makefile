@@ -51,7 +51,10 @@ obj/DirUtils.o:src/DirUtils.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 
-
+obj/SimpleGLibPipe.o:src/SimpleGLibPipe.h
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS) $< -o $@
+	
 install:
 	@mkdir -p ~/bin
 	mv bin/* ~/bin/
