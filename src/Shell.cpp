@@ -14,13 +14,17 @@
 #include <sys/wait.h>
 #include <cstring>
 #include <sstream>
+#include <ctype.h>
+
+
+#include <algorithm>
 #include "log.h"
+#include "SimpleGLibPipe.h"
 
 using std::string;
 using std::vector;
 
 // move these to a header
-vector<vector<string> > splitToVector(string completeStream, string delim);
 
 string IntToString(int num){
 
@@ -43,6 +47,42 @@ bool Shell::NeedToExit(vector<string> commands) {
 		return true;
 	else
 		return false;
+}
+
+void Shell::orConnector(bool& doExecution, bool& success, int execi, int size,
+		std::vector<std::vector<std::string> > execCommandSet,
+		bool& resetExecution) {
+	log("Found a || connector")
+	doExecution = !success;
+	string yes = "Will execute beacuse prevois command failed";
+	string no = "Not executing next command because prevois command succeeded";
+	string logs = ((doExecution == true) ? yes : no);
+	log(logs)
+	// if it turn out that we do not execute the next command
+	// we dont need to execute until a ; is found
+	if (!doExecution) {
+		log("Finding next vector to execute")
+		for (int findNextEnd = execi; findNextEnd < size; findNextEnd++) {
+			log("Checking vector " + IntToString(execi))
+			vector < string > tmp = execCommandSet[execi]; //
+			string connector = tmp[tmp.size() - 1];
+			log(connector)
+			// once we find the connector, advance execi to the vector
+			// following that connector
+			if (connector.compare(";") == 0) {
+				execi = (findNextEnd);
+				log("Found next ; at " + IntToString(execi))
+				// since the executin flag is false, break out
+				// of the loop and let the outer loop complete
+				// execution is phrohibited
+				resetExecution = true;
+				// break out from the loop
+				break;
+			}
+
+		}
+
+	}
 }
 
 void Shell::StartShell(int argc, char **argv){
@@ -78,11 +118,12 @@ void Shell::StartShell(int argc, char **argv){
 			// loop through the commands to execute
 			for(int execi = 0; execi < size; execi++){
 
-				log("Find exit status")
+				log("Finding exit status")
 				if(NeedToExit(execCommandSet[execi])){
 					terminate = true;
 					log("Going to exit the program")
-					break;
+					//exit(0);
+					return; // This is okay because there is no cleanup needed
 				}else{
 					// Execute the command
 					log("Beginning execution phase for command " + IntToString(execi))
@@ -93,7 +134,7 @@ void Shell::StartShell(int argc, char **argv){
 					// on the last command a connector
 					// we should only check the connector if there is only more than one
 					// set of commands to execute
-					if(execi > 0){
+					if((execi > 0) && (size > 1)){
 						log("Searching for a connector")
 						// Grab a ptr to the prevois vector
 						// This is why we must have more than one vector
@@ -102,43 +143,11 @@ void Shell::StartShell(int argc, char **argv){
 						// if the connector was a ; execute the command
 						// if it was || execute only if the last one failed
 						// if it was a && execute if it succeded
-						if(connector.compare("||") == 0){
-							log("Found a || connector")
-							doExecution = !success;
-
-							string yes = "Will execute beacuse prevois command failed";
-							string no = "Not executing next command because prevois command succeeded";
-							string logs = ((doExecution == true) ? yes : no);
-							log(logs)
-
-							// if it turn out that we do not execute the next command
-							// we dont need to execute until a ; is found
-							if(!doExecution){
-								log("Finding next vector to execute")
-								for(int findNextEnd = execi; findNextEnd < size; findNextEnd++){
-									log("Checking vector " + IntToString(execi))
-									vector<string> tmp = execCommandSet[execi]; //
-									string connector = tmp[tmp.size()-1];
-									log(connector)
-									// once we find the connector, advance execi to the vector
-									// following that connector
-									if(connector.compare(";") == 0){
-										execi = (findNextEnd);
-										log("Found next ; at " + IntToString(execi))
-										// since the executin flag is false, break out
-										// of the loop and let the outer loop complete
-										// execution is phrohibited
-										resetExecution = true;
-										// break out from the loop
-										break;
-									}
-
-
-								}
-
-							}
+						if(connector.compare("||") == 0) {
+							orConnector(doExecution, success, execi, size,
+									execCommandSet, resetExecution);
 						}
-						if(connector.compare("&&") == 0){
+						else if(connector.compare("&&") == 0){
 							log("Found a && connector")
 							doExecution = success;
 							string yes = "Will execute beacuse prevois command succeded";
@@ -146,6 +155,18 @@ void Shell::StartShell(int argc, char **argv){
 							string logs = ((doExecution == true) ? yes : no);
 							log(logs)
 
+
+						}
+						else if(connector.compare(">>") == 0){
+							log("Found a >> connector")
+
+						}
+						else if(connector.compare(">") == 0){
+							log("Found a > connector")
+
+						}
+						else if(connector.compare("<") == 0){
+							log("Found a < connector")
 
 						}
 
@@ -171,6 +192,8 @@ void Shell::StartShell(int argc, char **argv){
 					string tmp = (success == true ? "true" : "false");
 					log(tmp)
 				}
+
+
 			}
 		}
 
@@ -252,11 +275,14 @@ vector<vector<string> > Shell::TokenizeCommandStream(string commandStream) {
 	vector<vector<string> > completeENDedCommands = TokenizeToLogicalEND(commandStream);
 	dumpEntireCommandVector(completeENDedCommands);
 	vector<vector<string> > completeORedCommands = TokenizeToLogicalOR(completeENDedCommands);
+	completeENDedCommands.clear();
 	dumpEntireCommandVector(completeORedCommands);
 	vector<vector<string> > completedANDCommands = TokenizeToLogicalAND(completeORedCommands);
 	dumpEntireCommandVector(completedANDCommands);
-	//vector<vector<string> > completedConnecterizedCommands = TokenizeToConnectors(completedANDCommands);
-	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedANDCommands);
+	vector<vector<string> > completedRightRedirCommands = TokenizeVector(completedANDCommands, ">");
+	vector<vector<string> > completedLeftRedirCommands = TokenizeVector(completedRightRedirCommands, "<");
+
+	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedLeftRedirCommands);
 	log("There is a total of ")
 	log(completedTokenCommands.size())
 	log("Commands to run")
@@ -281,10 +307,11 @@ vector<vector<string> > Shell::TokenizeToLogicalEND(string completeStream){
 // All vectors are size 2
 // except the last command, or if there is a single, which can be size one
 // string in the form of [command and flags and othe connectors][connector]
-vector<vector<string> > splitToVector(string completeStream, string delim){
+vector<vector<string> > Shell::splitToVector(string completeStream, string delim){
 
 	vector<string>  commands;
 	vector<vector<string> > commandSet;
+	log(completeStream)
 
 	int foundAt = -1;
 	int start = 0;
@@ -295,6 +322,7 @@ vector<vector<string> > splitToVector(string completeStream, string delim){
 
 		// First the first occurence of the delim
 		foundAt = end = completeStream.find(delim, start);
+
 		// cut the string from the start of the token to the delim
 		// or from the start of the token to the end of the string
 		// if no delim is found
@@ -308,10 +336,22 @@ vector<vector<string> > splitToVector(string completeStream, string delim){
 		log(end)
 
 		int sSize = end-start;
-		commandString = new char[256];
+		commandString = new char[sSize+1];
+		for(int i = 0; i < (sSize+1); i++){
+			commandString[i] = '\0';
+		}
 
-		if((pass > 0 )&& (foundAt < 0 ) && (start > end) )
+		if(foundAt < 0 ){
+			if(start > end)
+				break;
+			log("Pushing back final string")
+			completeStream.copy(commandString, sSize, start);
+			log(string(commandString))
+			//push back the command stream between tokens
+			commands.push_back(string(commandString));
+			commandSet.push_back(commands);
 			break;
+		}
 
 		completeStream.copy(commandString, sSize, start);
 		log(string(commandString))
@@ -322,22 +362,50 @@ vector<vector<string> > splitToVector(string completeStream, string delim){
 			break;
 		}
 
-		start = start + sSize ;
+		start = foundAt;
+
+		log(start)
+		char c = commandString[0];
+		for(int i = 0; c != '\0'; i++){
+			c = commandString[i];
+			log(c)
+
+		}
+		//}
 
 		commandString = 0;
 		delete commandString;
 
 		commandString = new char[256];
+		for(int i = 0; i < 256; i++){
+			commandString[i] = '\0';
+		}
 
 		// Next grab the delim
 		log("Second string: delim")
 		log(start)
+		log(delim.size());
 		end = start + delim.size();
 		log(end)
 
-		sSize = end-start;
+		sSize = delim.size();// end-start;
+		if((delim.size() == 1 )&& (completeStream[start] ==  delim[0]) && (completeStream[start+1] ==  delim[0])){
+			log("double delim")
+			sSize++;
+		}
+
+
 		completeStream.copy(commandString, sSize, start );
+		c = commandString[0];
+		int i = 0;
+		while( c != '\0'){
+				log(commandString[i])
+				c = commandString[i];
+				i++;
+		}
 		// push back the deliminator
+		log("pushing back deliminator")
+
 		log(string(commandString))
 		commands.push_back(string(commandString));
 
@@ -354,26 +422,98 @@ vector<vector<string> > splitToVector(string completeStream, string delim){
 		commands.clear();
 
 		// Do this while there is a deliminator
-		pass++;
+		//pass++;
 	}while(foundAt > 0);
 	commandString = 0;
 	delete commandString;
 
-#ifdef DEBUG
-	int size = commandSet.size();
-	string message1 = "Command set size: " ;
-	log(message1)
-	log(size)
-	for(int z = 0; z < commandSet.size(); z++){
-
-			int sizze = commandSet[z].size();
-			string message1 = "Command string size: " ;
-			log(message1)
-			log(sizze)
-	}
-#endif
+	dumpEntireCommandVector(commandSet);
 
 	return commandSet;
+}
+
+// Tokenize a string by the logical OR operator ||
+// All vectors are size 2
+// except the last command, or if there is a single, which can be size one
+// string in the form of [command and flags and other connectors][connector]
+vector<vector<string> > Shell::TokenizeVector(vector<vector<string> > commandVector, string tok){
+	string message = "Tokenizing vector by " + tok;
+	log(message)
+
+			vector<string> *spaceVector;
+			vector<vector<string> > commandSet;
+			//if(commandVector.size() <= 1 ){
+			//	commandSet = commandVector;
+			//	return commandSet;
+			//}
+
+			char* buffer = new char[256];
+
+			log("will tokenize " + IntToString(commandVector.size()) + " vectors")
+			// loop trough our set of commands
+			for(unsigned int i = 0; i <= commandVector.size()-1; i++){
+				log("Looping through vectors to tokenize")
+				// loop through the connectorized vectors
+				log(commandVector.at(i).at(0))
+
+				spaceVector = &commandVector.at(i); //[stuff][connector]
+				log("Tokenizing " + IntToString(i) + " vector")
+				vector<string> flattencommand;
+
+
+				// tokenize each string
+				log(spaceVector->at(0))
+
+				// split this vector by delim
+				vector<vector<string> > commands = splitToVector(spaceVector->at(0), tok); // [stuff]
+				//dumpEntireCommandVector(commands);
+				log("getting commands")
+				// loop through the return vectors
+				// get the vector reference
+
+				for(int j = 0; j < commands.size(); j++){
+					vector<string> *command = &commands.at(j);//[stuff][connector]
+					log("Got the reference")
+					for(signed int z = 0; z < command->size(); z++){
+						// push back each string
+						log("Pushing back command")
+						string s = command->at(z);
+						log(s)
+						flattencommand.push_back(command->at(z));
+
+					}
+					// add back on the deliminator
+					log("add back delim if there was one")
+					if(spaceVector->size() > 1)
+						flattencommand.push_back(spaceVector->at(1));
+
+					log("Dumping the flattened commands")
+					for(signed int z = 0; z < flattencommand.size(); z++){
+						// push back each string
+						log(flattencommand[z]);
+					}
+					commandSet.push_back(flattencommand);
+					flattencommand.clear();
+					//log(IntToString(i))
+
+				}
+
+
+
+			}
+			buffer = 0;
+			delete buffer;
+
+			dumpEntireCommandVector(commandSet);
+			log("found ")
+			log(commandSet.size())
+			log("command sets")
+
+
+			return commandSet;
+
+
+
 }
 // Tokenize a string by the logical OR operator ||
 // All vectors are size 2
@@ -585,7 +725,6 @@ vector<vector<string> > Shell::TokenizeToLogicalAND(vector<vector<string> > pars
 
 		return commandSet;
 
-	return parseVector;
 }
 // Tokenize a string by spaces
 // All input vectors are size 2
@@ -663,11 +802,20 @@ vector<vector<string> > Shell::TokenizeToSpaces(vector<vector<string> > complete
 
 }
 
+
+void Shell::dumpEntireCommandVector(vector<string> & commandSet) {
+
+#ifdef DEBUG
+	vector<vector<string> > tmp;
+	tmp.push_back(commandSet);
+	dumpEntireCommandVector(tmp);
+#endif
+}
 void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
 
 #ifdef DEBUG
-	std::cout << std::endl << std::endl;
-	log("Entire commandset")
+	std::cout << std::endl << "Start dump"<< std::endl ;
+	log("Entire commandset " + IntToString(commandSet.size()))
 	for(int i = 0; i < commandSet.size(); i++){
 		string screen = "commandset :";
 		log(screen)
@@ -681,7 +829,7 @@ void Shell::dumpEntireCommandVector(vector<vector<string> >& commandSet) {
 
 
 	}
-	std::cout << std::endl << std::endl;
+	std::cout << "End dump" << std::endl << std::endl;
 #endif
 }
 
@@ -726,7 +874,7 @@ void Shell::handleChildExecution(vector<string> commandVector) {
 			log("about to copy string")
 			char *str = new char;
 			strcpy(str,scommand.c_str());
-			log(str);
+			//log(str);
 			argv[i] = str;
 			log(argv[i]);
 			//strcpy(argvi)
@@ -803,7 +951,7 @@ bool Shell::ExecuteCommand(vector<string> commandVect){
 	// the parent should wait for the child to finish
 	// unless a & is encountered
 
-	return true;
+	return false;
 }
 bool Shell::callCD(string path){
 

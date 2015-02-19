@@ -9,33 +9,44 @@ debug: LDFLAGS += -g
 debug: all
 	
 	
-$(EXECUTABLE): obj/CS100.o obj/Shell.o  
+$(EXECUTABLE): obj/CS100.o obj/Shell.o
 	@mkdir -p bin
 	$(CC)  $(LDFLAGS) obj/CS100.o obj/Shell.o -o bin/$@
 
 cp : obj/cp.o
 	$(CC)  $(LDFLAGS) obj/cp.o -o bin/$@
 	
+ls:obj/Lslib.o obj/Ls.o
+	$(CC)  $(LDFLAGS) obj/Lslib.o obj/Ls.o -o bin/$@	
+	
+	
+## CP files
+
 obj/cp.o : src/cp.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+	
+## Shell files
 
-
-obj/Shell.o:src/Shell.cpp
+obj/Shell.o:src/Shell.cpp src/SimpleGLibPipe.h src/log.h  
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS)  $< -o $@
+	
+obj/SimpleGLibPipe.o:src/SimpleGLibPipe.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
-
-obj/CS100.o:src/CS100.cpp 
+	
+obj/CS100.o:src/CS100.cpp
 	@mkdir -p obj
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS)  $< -o $@
 	
 obj/log.o:src/log.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 	
-ls:obj/Lslib.o obj/Ls.o
-	$(CC)  $(LDFLAGS) obj/Lslib.o obj/Ls.o -o bin/$@
+## Ls files
 	
 obj/Lslib.o:src/Lslib.cpp src/DirUtils.h
 	@mkdir -p obj
@@ -51,9 +62,7 @@ obj/DirUtils.o:src/DirUtils.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 
-obj/SimpleGLibPipe.o:src/SimpleGLibPipe.h
-	@mkdir -p obj
-	$(CC) -c $(CFLAGS) $< -o $@
+# make commands
 	
 install:
 	@mkdir -p ~/bin

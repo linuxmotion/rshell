@@ -27,12 +27,20 @@ public:
 
 private:
 	string mCurrentDirectory;
+	void orConnector(bool& doExecution, bool& success, int execi, int size,
+			std::vector<std::vector<std::string> > execCommandSet,
+			bool& resetExecution);
+	void dumpEntireCommandVector(vector<string> & commandSet);
 	void dumpEntireCommandVector(vector<vector<string> >& commandSet);
+	// These should all be encapsulated into one function accessed by a single object
+	vector<vector<string> > splitToVector(string completeStream, string delim);
+	// These are all essentailly the same
 	vector<vector<string> > TokenizeToSpaces(vector<vector<string> > completeStream);
 	vector<vector<string> > TokenizeToLogicalEND(string completeCommands);
 	vector<vector<string> > TokenizeToLogicalOR(vector<vector<string> > parseVector);
 	vector<vector<string> > TokenizeToLogicalAND(vector<vector<string> > parseVector);
     vector<vector<string> > TokenizeCommandStream(string commandStream);
+    vector<vector<string> > TokenizeVector(vector<vector<string> > parseVector, string token);
 	void handleChildExecution(std::vector<std::string> command);
 	bool handleParentExecution(pid_t pid,bool wait);
 	string tildeExpansion();
