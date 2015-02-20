@@ -10,6 +10,10 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+using std::cout;
+using std::endl;
+
 #include "log.h"
 
 using std::vector;
@@ -21,13 +25,14 @@ public:
 	static vector<vector<string> > TokenizeCommandStream(string commandStream) {
 
 	log("Tokenizing commands")
-	vector<vector<string> > completeENDedCommands = TokenizeToLogicalEND(commandStream);
-	vector<vector<string> > completeORedCommands = TokenizeToLogicalOR(completeENDedCommands);
-	vector<vector<string> > completedANDCommands = TokenizeToLogicalAND(completeORedCommands);
+	vector<vector<string> > completedENDedCommands = TokenizeToLogicalEND(commandStream);
+	vector<vector<string> > completedPipeRedirCommands = TokenizeVector(completedENDedCommands, "|");
+	vector<vector<string> > completedORedCommands = TokenizeToLogicalOR(completedPipeRedirCommands);
+	vector<vector<string> > completedANDCommands = TokenizeToLogicalAND(completedORedCommands);
 	vector<vector<string> > completedRightRedirCommands = TokenizeVector(completedANDCommands, ">");
 	vector<vector<string> > completedLeftRedirCommands = TokenizeVector(completedRightRedirCommands, "<");
 
-	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedLeftRedirCommands);
+	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedPipeRedirCommands);
 	log("There is a total of ")
 	log(completedTokenCommands.size())
 	log("Commands to run")

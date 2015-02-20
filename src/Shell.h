@@ -27,6 +27,7 @@ private:
 	vector<vector<string> > ParseCommands(string commandStream);
 	bool NeedToExit(vector<string> commands);
 	bool Execute(vector<string> command);
+	bool Execute(vector<string> command, bool wait);
 	bool ExecuteCommands(vector<vector<string> > command);
 	virtual bool HandleConnectors(int size,
 						  int &execi,
@@ -38,6 +39,8 @@ private:
 							    	   vector<string>& rightHandSide);
 	bool rightRedirection(vector<string>& leftHandSide,
 								 vector<string>& rightHandSide);
+	bool handlePipe(vector<string>& leftHandSide,
+					vector<string>& rightHandSide);
 	void orConnector(bool& doExecution,
 					 bool& success,
 					 int execi,

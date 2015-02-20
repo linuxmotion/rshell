@@ -19,6 +19,7 @@ class SimpleGlibPipe{
 
 private:
 	int mPipes[2];
+	int mSavedPipes[2];
 	int mOpenPipes[2];
 
 public:
@@ -98,11 +99,16 @@ public:
 			fprintf(stderr, "Unable to get read pipe");
 			return false;
 		}
-
 		dup2(getReadPipe(), fd);
 
 
 		return true;
+	}
+
+	void resetPipes(){
+
+		dup2(mSavedPipes[0], STDIN_FILENO);
+		dup2(mSavedPipes[1], STDOUT_FILENO);
 	}
 
 	/**

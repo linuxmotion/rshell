@@ -12,7 +12,7 @@
 #include <vector>
 #include <iostream>
 // Comment this out to disable debuging
-#define DEBUG
+//#define DEBUG
 
 using std::string;
 using std::vector;
@@ -104,7 +104,8 @@ bool isConnector(string str){
 			|| (str.compare(";")== 0)
 			|| (str.compare(">") == 0)
 			|| (str.compare(">>") == 0)
-			|| (str.compare("<") == 0)){
+			|| (str.compare("<") == 0)
+			|| (str.compare("|") == 0)){
 		log("A connector was found")
 		return true;
 	}

@@ -270,6 +270,10 @@ bool Shell::handleParentExecution(pid_t pid,bool wait) {
 }
 
 bool Shell::Execute(vector<string> commandVect){
+	return Execute(commandVect, true);
+}
+
+bool Shell::Execute(vector<string> commandVect, bool wait){
 	log("Forking process")
 
 	// first we must fork
@@ -283,7 +287,7 @@ bool Shell::Execute(vector<string> commandVect){
 	}
 	else if(PID > 0){
 		// Parent process
-		return handleParentExecution(PID, true);
+		return handleParentExecution(PID, wait);
 	}
 	else{
 		perror("Something bad happened with fork");
@@ -521,6 +525,12 @@ bool Shell::HandleConnectors(int size,
 				handleLeftRedirect(LeftHandSide, RightHandSide );
 				return true;
 				// handle right redirection with append
+			}else if(connector.compare("|") == 0){
+				log("Found a | connector")
+				RightHandSide = execCommandSet[execi];
+				handlePipe(LeftHandSide, RightHandSide );
+				return true;
+				// handle right redirection with append
 			}
 
 		}
@@ -534,7 +544,76 @@ bool Shell::HandleConnectors(int size,
 
 }
 
+bool Shell::handlePipe(vector<string>& leftHandSide,
+		vector<string>& rightHandSide){
 
+	try {
+
+
+		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
+		SimpleGlibPipe myPipe;
+		int sout = dup(STDOUT_FILENO);
+		int sin = dup(STDIN_FILENO);
+
+		pid_t kidpid = fork(); // we entered a command, fork
+		if (kidpid) {
+			log("Connecting read pipe from " << leftHandSide[0]);
+			myPipe.setwritePipe(STDOUT_FILENO);
+			myPipe.closeReadPipe();
+			vector<string>Tokens = leftHandSide;
+			Execute(Tokens);
+		} else if (kidpid == 0) {
+
+			log("Connecting write pipe to " << rightHandSide[0]);
+
+			myPipe.setReadPipe(STDIN_FILENO);
+			myPipe.closeWritePipe();
+
+
+			vector<string>Tokens = rightHandSide;
+
+
+			vector<string>::const_iterator bter = Tokens.begin();
+			vector<string>::const_iterator eter = Tokens.end();
+			for(int i = 0; bter < eter; i++, bter++ ){
+
+				if(Tokens[i] == ">>"){
+					log(">>")
+					rightHandSide = vector<string>(++bter, eter);
+					this->rightRedirectionAppend(leftHandSide, rightHandSide);
+					exit(EXIT_FAILURE);
+
+				}else if(Tokens[i] == ">"){
+					log(">")
+					rightHandSide= vector<string>(++bter, eter);
+					this->rightRedirection(leftHandSide, rightHandSide);
+					exit(EXIT_FAILURE);
+				}
+
+			}
+
+			Execute(Tokens, false);
+			myPipe.setReadPipe(sin);
+			myPipe.setwritePipe(sout);
+		} else {
+			// some error must have occurred
+			perror("Internal error: could not fork process.");
+			log("Error creating process");
+
+		}
+
+
+
+
+	} catch (int ex) {
+		perror("Internal error: could not create pipe.");
+
+	}
+
+	return false;
+
+
+}
 
 /// Misc funstion
 
