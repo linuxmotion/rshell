@@ -320,52 +320,7 @@ void Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 			// grab the commands set to execute
 			vector<string> command = execCommandSet[execi];
 
-			// if commandSet had more than one command, was the last string
-			// on the last command a connector
-			// we should only check the connector if there is only more than one
-			// set of commands to execute
-			if((execi > 0) && (size > 1)){
-
-				//HandleConnectors();
-				log("Searching for a connector")
-				// Grab a ptr to the prevois vector
-				// This is why we must have more than one vector
-				vector<string> tmp = execCommandSet[execi-1]; // I really hate having to do this line
-				string connector = tmp[tmp.size()-1];
-				// if the connector was a ; execute the command
-				// if it was || execute only if the last one failed
-				// if it was a && execute if it succeded
-				if(connector.compare("||") == 0) {
-					orConnector(doExecution, success, execi, size,
-							execCommandSet, resetExecution);
-				}
-				else if(connector.compare("&&") == 0){
-					log("Found a && connector")
-					doExecution = success;
-					string yes = "Will execute beacuse prevois command succeded";
-					string no = "Not executing next command because prevois command failed";
-					string logs = ((doExecution == true) ? yes : no);
-					log(logs)
-
-
-				}
-				else if(connector.compare(">>") == 0){
-					log("Found a >> connector")
-							// handle right redirection with append
-
-				}
-				else if(connector.compare(">") == 0){
-					log("Found a > connector")
-							// handle right redirection without append
-
-				}
-				else if(connector.compare("<") == 0){
-					log("Found a < connector")
-							// handle input redirection
-
-				}
-
-			}
+			hnadleConnectors;
 
 
 			if(doExecution){
@@ -389,6 +344,52 @@ void Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 	}
 
+
+}
+
+bool Shell::HandleConnectors(int size,
+					  int execi,
+					  vector<vector<string> > execCommandSet,
+					  vector<string> command,
+					  bool &doExecution,
+					  bool &resetExecution,
+					  bool &success){
+
+
+
+	string connector = command[command.size()-1];
+	// if commandSet had more than one command, was the last string
+	// on the last command a logical connector
+	// we should only check the connector if there is only more than one
+	// set of commands to execute
+	if((execi > 0) && (size > 1)){
+
+		//HandleConnectors();
+		log("Searching for a connector")
+		// Grab a ptr to the prevois vector
+		// This is why we must have more than one vector
+		vector<string> tmp = execCommandSet[execi-1]; // I really hate having to do this line
+		connector = tmp[tmp.size()-1];
+		// if the connector was a ; execute the command
+		// if it was || execute only if the last one failed
+		// if it was a && execute if it succeded
+		if(connector.compare("||") == 0) {
+			orConnector(doExecution, success, execi, size,
+					execCommandSet, resetExecution);
+		}
+		else if(connector.compare("&&") == 0){
+			log("Found a && connector")
+			doExecution = success;
+			string yes = "Will execute beacuse prevois command succeded";
+			string no = "Not executing next command because prevois command failed";
+			string logs = ((doExecution == true) ? yes : no);
+			log(logs)
+
+
+		}
+
+
+	}
 
 }
 

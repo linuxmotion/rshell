@@ -28,10 +28,20 @@ private:
 	bool NeedToExit(vector<string> commands);
 	bool Execute(vector<string> command);
 	void ExecuteCommands(vector<vector<string> > command);
+	void HandleConnectors(int size,
+						  int execi,
+						  vector<vector<string> > execCommandSet,
+						  vector<string> command,
+						  bool &doExecution,
+						  bool &resetEecution,
+						  bool &success){
 
-	void orConnector(bool& doExecution, bool& success, int execi, int size,
-			vector<vector<string> > execCommandSet,
-			bool& resetExecution);
+	void orConnector(bool& doExecution,
+					 bool& success,
+					 int execi,
+					 int size,
+					 vector<vector<string> > execCommandSet,
+					 bool& resetExecution);
 	void handleChildExecution(vector<string> command);
 	bool handleParentExecution(pid_t pid,bool wait);
 
