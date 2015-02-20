@@ -7,13 +7,15 @@
 
 #ifndef LOG_H_
 #define LOG_H_
+#include <sstream>
 #include <string>
 #include <vector>
 #include <iostream>
 // Comment this out to disable debuging
 #define DEBUG
 
-
+using std::string;
+using std::vector;
 using std::cout;
 using std::endl;
 using std::cerr;
@@ -89,7 +91,6 @@ void dumpEntireCommandVector(vector<vector<string> > commandSet) {
 
 
 string IntToString(int num){
-
 
 	std::stringstream ss;
 	ss << num;

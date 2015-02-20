@@ -105,10 +105,10 @@ void Shell::Run(){
 		// set initial success status to true
 		// If there was one or more commands to execute, execute them
 		if(execCommandSet.size() > 0){
-			ExecuteCommands(execCommandSet);
+			terminate = ExecuteCommands(execCommandSet);
 		}
 
-	}while(!terminate);
+	}while(terminate == false);
 }
 void Shell::PrintCommandPrompt(){
 	log("Printing command line")
@@ -293,11 +293,10 @@ bool Shell::Execute(vector<string> commandVect){
 
 	return false;
 }
-void Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
+bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 
 	bool resetExecution = false;
-	bool terminate = false;
 	bool success = true;
 	// set initial execution status to true
 	bool doExecution = true;
@@ -309,10 +308,8 @@ void Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 		log("Finding exit status")
 		if(NeedToExit(execCommandSet[execi])){
-			terminate = true;
 			log("Going to exit the program")
-			//exit(0);
-			return; // This is okay because there is no cleanup needed
+			return true; // This is okay because there is no cleanup needed
 		}else{
 
 			// Execute the command
@@ -320,10 +317,16 @@ void Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 			// grab the commands set to execute
 			vector<string> command = execCommandSet[execi];
 
-			hnadleConnectors;
+			bool execFromRedir = HandleConnectors(size,
+												  execi,
+												  execCommandSet,
+												  doExecution,
+												  resetExecution,
+												  success);
 
 
-			if(doExecution){
+
+			if(!execFromRedir && doExecution){
 				log("Will execute a command")
 				success = Execute(command);
 			}
@@ -343,53 +346,91 @@ void Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 
 	}
+	return false;
 
 
 }
 
 bool Shell::HandleConnectors(int size,
-					  int execi,
+					  int &execi,
 					  vector<vector<string> > execCommandSet,
-					  vector<string> command,
 					  bool &doExecution,
 					  bool &resetExecution,
 					  bool &success){
-
-
-
-	string connector = command[command.size()-1];
 	// if commandSet had more than one command, was the last string
-	// on the last command a logical connector
+	// on the last command a connector
 	// we should only check the connector if there is only more than one
 	// set of commands to execute
+
+
 	if((execi > 0) && (size > 1)){
 
-		//HandleConnectors();
-		log("Searching for a connector")
-		// Grab a ptr to the prevois vector
-		// This is why we must have more than one vector
-		vector<string> tmp = execCommandSet[execi-1]; // I really hate having to do this line
-		connector = tmp[tmp.size()-1];
-		// if the connector was a ; execute the command
-		// if it was || execute only if the last one failed
-		// if it was a && execute if it succeded
-		if(connector.compare("||") == 0) {
-			orConnector(doExecution, success, execi, size,
-					execCommandSet, resetExecution);
+		 //HandleConnectors();
+		 log("Searching for a connector")
+		 // Grab a ptr to the prevois vector
+		 // This is why we must have more than one vector
+		 vector<string> tmp = execCommandSet[execi-1]; // I really hate having to do this line
+		 string connector = tmp[tmp.size()-1];
+		 // if the connector was a ; execute the command
+		 // if it was || execute only if the last one failed
+		 // if it was a && execute if it succeded
+		 if(connector.compare("||") == 0) {
+				 orConnector(doExecution, success, execi, size,
+								 execCommandSet, resetExecution);
+		 }
+		 else if(connector.compare("&&") == 0){
+				 log("Found a && connector")
+				 doExecution = success;
+				 string yes = "Will execute beacuse prevois command succeded";
+				 string no = "Not executing next command because prevois command failed";
+				 string logs = ((doExecution == true) ? yes : no);
+				 log(logs)
+
+
+		 }
+
+    }
+
+	// if commandSet had more than one command, was the last string
+		// on the last command a connector
+		// we should only check the connector if there is only more than one
+		// set of commands to execute
+		if(size > 1){
+
+			//HandleConnectors();
+			log("Searching for a connector")
+			// Grab a ptr to the prevois vector
+			// This is why we must have more than one vector
+			vector<string> tmp = execCommandSet[execi];
+			string connector = tmp[tmp.size()-1];
+
+			// mark the next command as processed
+			execi++;
+
+			if(connector.compare(">>") == 0){
+				log("Found a >> connector")
+				// handle right redirection with append
+				return true;
+			}
+			else if(connector.compare(">") == 0){
+				log("Found a > connector")
+				// handle right redirection with append
+				return true;
+			}
+			else if(connector.compare("<") == 0){
+				log("Found a < connector")
+				// handle right redirection with append
+				return true;
+			}
+
 		}
-		else if(connector.compare("&&") == 0){
-			log("Found a && connector")
-			doExecution = success;
-			string yes = "Will execute beacuse prevois command succeded";
-			string no = "Not executing next command because prevois command failed";
-			string logs = ((doExecution == true) ? yes : no);
-			log(logs)
 
 
-		}
+
+	return false;
 
 
-	}
+
 
 }
 

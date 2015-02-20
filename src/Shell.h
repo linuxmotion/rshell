@@ -27,14 +27,13 @@ private:
 	vector<vector<string> > ParseCommands(string commandStream);
 	bool NeedToExit(vector<string> commands);
 	bool Execute(vector<string> command);
-	void ExecuteCommands(vector<vector<string> > command);
-	void HandleConnectors(int size,
-						  int execi,
+	bool ExecuteCommands(vector<vector<string> > command);
+	virtual bool HandleConnectors(int size,
+						  int &execi,
 						  vector<vector<string> > execCommandSet,
-						  vector<string> command,
 						  bool &doExecution,
 						  bool &resetEecution,
-						  bool &success){
+						  bool &success);
 
 	void orConnector(bool& doExecution,
 					 bool& success,
