@@ -400,6 +400,7 @@ bool Shell::rightRedirection(vector<string>& leftHandSide,
 			return false;
 
 		log("Setting the output")
+		int save = dup(STDOUT_FILENO);
 		//Now we redirect standard output to the file using dup2
 		dup2(file,STDOUT_FILENO);
 
@@ -409,7 +410,38 @@ bool Shell::rightRedirection(vector<string>& leftHandSide,
 		//Now standard out has been redirected, we can write to
 		// the file
 		Execute(leftHandSide);
+		dup2(save, STDOUT_FILENO);
+		close(save);
 		return true;
+}
+
+void Shell::handleLeftRedirect(vector<string>& LeftHandSide,
+							   vector<string>& RightHandSide
+							   ) {
+
+	const int BUFFER_SIZE = 256;
+	log("Redirecting from " << RightHandSide[0] << " into " << LeftHandSide[0])
+	char* st = new char[BUFFER_SIZE];
+	strcpy(st, DirUtils::get_cwd().c_str());
+	strcat(st, "/");
+	strcat(st, RightHandSide[0].c_str());
+	log(st)
+	int file = open(st, O_RDONLY);
+	log("Opened redirection pipe to " << st)
+	if (file < 0) {
+		perror("I/O Error: Failed to get a valid file descriptor");
+		//return false;
+	}
+	st = 0;
+	delete st;
+	log("Connecting the input stream to " << LeftHandSide[0])
+	//Now we redirect standard output to the file using dup2
+	int save = dup(STDIN_FILENO);
+	dup2(file, STDIN_FILENO);
+	Execute(LeftHandSide);
+	log("Closing inputstream fd")
+	close(file);
+	dup2(save, STDIN_FILENO);
 }
 
 bool Shell::HandleConnectors(int size,
@@ -486,42 +518,9 @@ bool Shell::HandleConnectors(int size,
 			else if(connector.compare("<") == 0){
 				log("Found a < connector")
 				RightHandSide = execCommandSet[execi];
-
-
-			const int BUFFER_SIZE = 256;
-
-			log("Redirecting from " << RightHandSide[0] << " into " << LeftHandSide[0] )
-			char * st = new char[BUFFER_SIZE];
-
-
-			strcpy(st,DirUtils::get_cwd().c_str());
-			strcat(st, "/");
-			strcat(st, RightHandSide[0].c_str());
-
-			log(st)
-			int file = open(st, O_RDONLY);
-			log("Opened redirection pipe to " << st)
-			if(file < 0){
-				perror("I/O Error: Failed to get a valid file descriptor");
-				return false;
-			}
-			st = 0;
-			delete st;
-
-			log("Connecting the input stream to " << LeftHandSide[0])
-			//Now we redirect standard output to the file using dup2
-			dup2(file,STDIN_FILENO);
-			Execute(LeftHandSide);
-			log("Closing inputstream fd")
-			close(file);
-
-
-
-
-
-			return true;
+				handleLeftRedirect(LeftHandSide, RightHandSide );
+				return true;
 				// handle right redirection with append
-
 			}
 
 		}

@@ -46,6 +46,8 @@ private:
 					 bool& resetExecution);
 	void handleChildExecution(vector<string> command);
 	bool handleParentExecution(pid_t pid,bool wait);
+	void handleLeftRedirect(vector<string>& RightHandSide,
+			vector<string>& LeftHandSide);
 
 
 };
