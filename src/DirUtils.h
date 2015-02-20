@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 using std::string;
 
@@ -92,7 +93,7 @@ struct DirectoryEntry{
 
 // Extracts the nessecarry information need to display the ls entry
 // return with a blank entry on failure, or a struct with all information
-static DirectoryEntry  extractDisplayData(struct dirent* entry, string root){
+static DirectoryEntry extractDisplayData(struct dirent* entry, string root){
 
 			DirectoryEntry Entry;
 			//printf("Displaying entry");

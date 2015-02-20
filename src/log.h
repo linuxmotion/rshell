@@ -99,7 +99,12 @@ string IntToString(int num){
 
 
 bool isConnector(string str){
-	if((str.compare("&&")== 0) || (str.compare("||")== 0) || (str.compare(";")== 0)){
+	if((str.compare("&&")== 0)
+			|| (str.compare("||")== 0)
+			|| (str.compare(";")== 0)
+			|| (str.compare(">") == 0)
+			|| (str.compare(">>") == 0)
+			|| (str.compare("<") == 0)){
 		log("A connector was found")
 		return true;
 	}

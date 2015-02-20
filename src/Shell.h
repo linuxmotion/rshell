@@ -34,7 +34,10 @@ private:
 						  bool &doExecution,
 						  bool &resetEecution,
 						  bool &success);
-
+	bool rightRedirectionAppend(vector<string>& leftHandSide,
+							    	   vector<string>& rightHandSide);
+	bool rightRedirection(vector<string>& leftHandSide,
+								 vector<string>& rightHandSide);
 	void orConnector(bool& doExecution,
 					 bool& success,
 					 int execi,
