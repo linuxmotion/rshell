@@ -24,14 +24,15 @@ private:
 	void Run();
 
 	string ReadInCommands();
-	vector<std::vector<std::string> > ParseCommands(std::string commandStream);
-	bool NeedToExit(std::vector<std::string> commands);
-	bool ExecuteCommand(std::vector<std::string> command);
+	vector<vector<string> > ParseCommands(string commandStream);
+	bool NeedToExit(vector<string> commands);
+	bool Execute(vector<string> command);
+	void ExecuteCommands(vector<vector<string> > command);
 
 	void orConnector(bool& doExecution, bool& success, int execi, int size,
-			std::vector<std::vector<std::string> > execCommandSet,
+			vector<vector<string> > execCommandSet,
 			bool& resetExecution);
-	void handleChildExecution(std::vector<std::string> command);
+	void handleChildExecution(vector<string> command);
 	bool handleParentExecution(pid_t pid,bool wait);
 
 

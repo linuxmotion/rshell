@@ -29,7 +29,7 @@ obj/cp.o : src/cp.cpp
 	
 ## Shell files
 
-obj/Shell.o:src/Shell.cpp src/SimpleGLibPipe.h src/log.h  
+obj/Shell.o:src/Shell.cpp src/SimpleGLibPipe.h src/log.h  src/Tokenizer.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $< -o $@
 	
@@ -44,7 +44,9 @@ obj/CS100.o:src/CS100.cpp
 obj/log.o:src/log.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+obj/Tokenizer.o:src/Tokenizer.cpp 
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS) $< -o $@	
 	
 ## Ls files
 	
