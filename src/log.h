@@ -11,7 +11,7 @@
 #include <vector>
 #include <iostream>
 // Comment this out to disable debuging
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 
@@ -44,6 +44,38 @@ void dumpCommands(char** commands, int size) {
 	}
 
 
+}
+
+
+void dumpEntireCommandVector(vector<string> & commandSet) {
+
+#ifdef DEBUG
+	vector<vector<string> > tmp;
+	tmp.push_back(commandSet);
+	dumpEntireCommandVector(tmp);
+#endif
+}
+
+void dumpEntireCommandVector(vector<vector<string> >& commandSet) {
+
+#ifdef DEBUG
+	std::cout << std::endl << "Start dump"<< std::endl ;
+	log("Entire commandset: " + IntToString(commandSet.size()))
+	for(int i = 0; i < commandSet.size(); i++){
+		string screen = "commandset :";
+		log(screen)
+		vector<string> commandString = commandSet[i];
+		string command = IntToString(commandString.size()) + ": ";
+		for(int z = 0; z < commandString.size(); z++){
+			command += commandString[z] + " ";
+		}
+		log(command)
+
+
+
+	}
+	std::cout << "End dump" << std::endl << std::endl;
+#endif
 }
 
 #endif /* LOG_H_ */
