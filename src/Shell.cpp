@@ -143,10 +143,11 @@ std::string Shell::ReadInCommands(){
 	char *mBuffer = new char[buffSize];
 
 	//std::cin.ignore(10, '\n');
+	//std::cin.ignore('\n');
+	//std::cin.
 	std::cin.clear();
 	std::cin.getline(mBuffer, buffSize);
-	// clean stdin
-	std::cin.clear();
+	//std::cin.clear();
 	return string(mBuffer);
 }
 
@@ -186,7 +187,7 @@ vector<vector<string> > Shell::ParseCommands(string commandStream){
 void Shell::handleChildExecution(vector<string> commandVector) {
 
 	vector<string> command = commandVector;
-	log("Executing child process")
+	log("Executing child process " + commandVector[0])
 	int size = command.size();
 	log(size)
 	log("commands Found")
@@ -547,68 +548,115 @@ bool Shell::HandleConnectors(int size,
 bool Shell::handlePipe(vector<string>& leftHandSide,
 		vector<string>& rightHandSide){
 
+
+		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
+		int fd[2];
+		pid_t kidpid1 = -1; // we entered a command, fork
+		pid_t kidpid2 = -1;
+
+		pipe(fd);
+
+		kidpid1 = fork();
+		if(kidpid1 < 0){
+			perror("fork failed");
+			return false;
+
+		}else if( kidpid1 == 0){
+			close(STDOUT_FILENO);
+			dup(fd[1]);
+			close(fd[0]);
+			close(fd[1]);
+			handleChildExecution(leftHandSide);
+		}
+
+		kidpid2 = fork();
+		if(kidpid1 < 0){
+			perror("fork failed");
+			return false;
+
+		}else if( kidpid2 == 0){
+			close(STDIN_FILENO);
+			dup(fd[0]);
+			close(fd[0]);
+			close(fd[1]);
+			handleChildExecution(rightHandSide);
+		}
+
+		close(fd[0]);
+		close(fd[1]);
+
+		handleParentExecution(kidpid1, true);
+		handleParentExecution(kidpid2, true);
+
+#ifdef DEBUG
+		string lside = leftHandSide[0];
+		string rside = rightHandSide[0];
+		for(unsigned int i = 1; i < leftHandSide.size(); i++){
+			lside += " " +  leftHandSide[i];
+		}
+		for(unsigned int i = 1; i < rightHandSide.size(); i++){
+			rside += " " +  rightHandSide[i];
+		}
+		log("Executed " << lside  << rside);
+
+#endif
+		/*
 	try {
+
 
 
 		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
 		SimpleGlibPipe myPipe;
-		int sout = dup(STDOUT_FILENO);
-		int sin = dup(STDIN_FILENO);
 
-		pid_t kidpid = fork(); // we entered a command, fork
-		if (kidpid) {
-			log("Connecting read pipe from " << leftHandSide[0]);
-			myPipe.setwritePipe(STDOUT_FILENO);
-			myPipe.closeReadPipe();
-			vector<string>Tokens = leftHandSide;
-			Execute(Tokens);
-		} else if (kidpid == 0) {
+		pid_t kidpid1 = fork(); // we entered a command, fork
+		pid_t kidpid2 = -1;
+		if (kidpid1) {
 
-			log("Connecting write pipe to " << rightHandSide[0]);
+			pid_t kidpid2 = fork(); // we entered a command, fork
+			if (kidpid2) {
 
-			myPipe.setReadPipe(STDIN_FILENO);
-			myPipe.closeWritePipe();
-
-
-			vector<string>Tokens = rightHandSide;
-
-
-			vector<string>::const_iterator bter = Tokens.begin();
-			vector<string>::const_iterator eter = Tokens.end();
-			for(int i = 0; bter < eter; i++, bter++ ){
-
-				if(Tokens[i] == ">>"){
-					log(">>")
-					rightHandSide = vector<string>(++bter, eter);
-					this->rightRedirectionAppend(leftHandSide, rightHandSide);
-					exit(EXIT_FAILURE);
-
-				}else if(Tokens[i] == ">"){
-					log(">")
-					rightHandSide= vector<string>(++bter, eter);
-					this->rightRedirection(leftHandSide, rightHandSide);
-					exit(EXIT_FAILURE);
-				}
-
+				log("Connecting write pipe to " << rightHandSide[0]);
+				close(STDIN_FILENO);
+				dup(myPipe.getWritePipe());
+				myPipe.closePipe();
+				//vector<string>Tokens = leftHandSide;
+				//handleChildExecution(rightHandSide);
+			}else if (kidpid2 == 0) {
+				//handleParentExecution(kidpid2, true);
+			}
+			else{
+				perror("Fork failed");
 			}
 
-			Execute(Tokens, false);
-			myPipe.setReadPipe(sin);
-			myPipe.setwritePipe(sout);
+		} else if (kidpid1 == 0) {
+
+
+			log("Connecting read pipe from " << leftHandSide[0]);
+			close(STDOUT_FILENO);
+			dup(myPipe.getReadPipe());
+			//myPipe.closePipe();
+			//vector<string>Tokens = leftHandSide;
+			handleChildExecution(leftHandSide);
+
+
 		} else {
 			// some error must have occurred
 			perror("Internal error: could not fork process.");
 			log("Error creating process");
 
 		}
+		myPipe.closePipe();
 
+		handleParentExecution(kidpid1, true);
+		handleParentExecution(kidpid2, true);
 
 
 
 	} catch (int ex) {
 		perror("Internal error: could not create pipe.");
 
-	}
+	}*/
+
 
 	return false;
 

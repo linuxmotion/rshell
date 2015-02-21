@@ -32,7 +32,7 @@ public:
 	vector<vector<string> > completedRightRedirCommands = TokenizeVector(completedANDCommands, ">");
 	vector<vector<string> > completedLeftRedirCommands = TokenizeVector(completedRightRedirCommands, "<");
 
-	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedPipeRedirCommands);
+	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedLeftRedirCommands);
 	log("There is a total of ")
 	log(completedTokenCommands.size())
 	log("Commands to run")

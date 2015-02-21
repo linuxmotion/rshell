@@ -123,7 +123,10 @@ public:
 
 	}
 
-
+	void closePipe(){
+			closeWritePipe();
+			closeReadPipe();
+		}
 
 
 	void closeWritePipe(){
