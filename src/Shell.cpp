@@ -312,6 +312,12 @@ bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 	int size = execCommandSet.size();
 
 	log("Looping through " + IntToString(size) + " command sets" )
+#ifdef DEBUG
+	for(int i = 0; i < execCommandSet.size(); i++){
+		dumpCommandVector(execCommandSet[i]);
+	}
+#endif
+
 	// loop through the commands to execute
 	for(int execi = 0; execi < size; execi++){
 
@@ -520,6 +526,8 @@ bool Shell::HandleConnectors(int size,
 				rightRedirection(LeftHandSide, RightHandSide);
 				return true;
 			}
+			// Hmmm does this need to be here
+			// i should handle pipes in a loop
 			else if(connector.compare("<") == 0){
 				log("Found a < connector")
 				RightHandSide = execCommandSet[execi];
@@ -600,62 +608,6 @@ bool Shell::handlePipe(vector<string>& leftHandSide,
 		log("Executed " << lside  << rside);
 
 #endif
-		/*
-	try {
-
-
-
-		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
-		SimpleGlibPipe myPipe;
-
-		pid_t kidpid1 = fork(); // we entered a command, fork
-		pid_t kidpid2 = -1;
-		if (kidpid1) {
-
-			pid_t kidpid2 = fork(); // we entered a command, fork
-			if (kidpid2) {
-
-				log("Connecting write pipe to " << rightHandSide[0]);
-				close(STDIN_FILENO);
-				dup(myPipe.getWritePipe());
-				myPipe.closePipe();
-				//vector<string>Tokens = leftHandSide;
-				//handleChildExecution(rightHandSide);
-			}else if (kidpid2 == 0) {
-				//handleParentExecution(kidpid2, true);
-			}
-			else{
-				perror("Fork failed");
-			}
-
-		} else if (kidpid1 == 0) {
-
-
-			log("Connecting read pipe from " << leftHandSide[0]);
-			close(STDOUT_FILENO);
-			dup(myPipe.getReadPipe());
-			//myPipe.closePipe();
-			//vector<string>Tokens = leftHandSide;
-			handleChildExecution(leftHandSide);
-
-
-		} else {
-			// some error must have occurred
-			perror("Internal error: could not fork process.");
-			log("Error creating process");
-
-		}
-		myPipe.closePipe();
-
-		handleParentExecution(kidpid1, true);
-		handleParentExecution(kidpid2, true);
-
-
-
-	} catch (int ex) {
-		perror("Internal error: could not create pipe.");
-
-	}*/
 
 
 	return false;
