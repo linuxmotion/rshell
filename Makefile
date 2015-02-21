@@ -30,25 +30,24 @@ obj/cp.o : src/cp.cpp
 	
 ## Shell files
 
-	
 
 
-obj/Shell.o:src/Shell.cpp 
+obj/Shell.o: src/Shell.cpp # src/Tokenizer.cpp src/log.cpp src/SimpleGlibPipe.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $< -o $@
 	
-obj/SimpleGLibPipe.o:src/SimpleGLibPipe.h
+obj/SimpleGLibPipe.o: src/SimpleGLibPipe.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-obj/CS100.o:src/CS100.cpp 
+obj/CS100.o: src/CS100.cpp src/Shell.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $< -o $@
 	
-obj/log.o:src/log.cpp 
+obj/log.o: src/log.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
-obj/Tokenizer.o:src/Tokenizer.cpp 
+obj/Tokenizer.o: src/Tokenizer.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@	
 	
