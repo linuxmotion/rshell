@@ -21,8 +21,7 @@
 #include <algorithm>
 
 #include "DirUtils.h"
-#include "log.h"
-#include "SimpleGLibPipe.h"
+//#include "log.h"
 #include "Tokenizer.h"
 #include "Cd.h"
 
@@ -35,6 +34,7 @@ using std::vector;
 
 Shell::Shell() {
 	// TODO Auto-generated constructor stub
+	setupInternalCommandList();
 
 }
 
@@ -306,11 +306,13 @@ bool Shell::Execute(vector<string> commandVect, bool wait){
 
 int Shell::isInternalCommand(const vector<string> *command){
 
+	log("isInternalCommand: finding " + command->at(0))
 	//loop though all possible internal commands
 	for(unsigned int i = 0; i < this->mInternalCommands.size(); i++){
 		// do we have a match
-		if(command->at(0) == mInternalCommands.at(i)){
+		if(command->at(0).compare(mInternalCommands.at(i)) == 0){
 			// we do have a match
+			log("Match Found at " + IntToString(i))
 			return i;
 		}
 	}
@@ -325,6 +327,7 @@ bool Shell::ExecuteInternalCommand(int pos, const vector<string> *command){
 	switch(pos){
 
 		case CD:{
+			log("Calling CD")
 			return Cd::callCD(command);
 		}
 
@@ -347,7 +350,7 @@ bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 	log("Looping through " + IntToString(size) + " command sets" )
 #ifdef DEBUG
-	for(int i = 0; i < execCommandSet.size(); i++){
+	for(unsigned int i = 0; i < execCommandSet.size(); i++){
 		dumpCommandVector(execCommandSet[i]);
 	}
 #endif

@@ -6,6 +6,8 @@
  */
 
 #include "Cd.h"
+#include "DirUtils.h"
+#define DEBUG
 //#include "log.h"
 
 #include <unistd.h>
@@ -89,8 +91,14 @@ string Cd::tildeExpansion(){
  * The second vector is the path to change to
  */
 bool Cd::callCD(const vector<string> *tokens){
+	//std::cout << __FILE__ << "::"<< __FUNCTION__ << "::"<< __LINE__ << " " << "CallCd" << std::endl;
 	//log("callCD");
-	string newDir = tokens->at(1);
+//ARRRRRRGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+#ifdef DEBUG
+	printf("callCD\n");
+#endif
+
+	string newDir = DirUtils::get_cwd();
 	if(tokens->size() > 1){
 		// it was change to root
 		if(tokens->at(1)[0] == '/')
@@ -106,7 +114,12 @@ bool Cd::callCD(const vector<string> *tokens){
 		// no change to directory was supplied, return to HOME
 		newDir = getenv("HOME");
 	}
-	//log("Changing the current dir: " + tokens[0] + " to " + newDir);
+//AAAAAAAAAAAAAARRRRRRRRRRRRGGGGGGGGGGGGGGGGGGGgggg
+#ifdef DEBUG
+	printf("Changing the current dir: %s to %s\n" , tokens->at(0).c_str() , newDir.c_str());
+#endif
+
+	//log()
 	// chdir return 0 on success
 	if(chdir(newDir.c_str())){
 		perror("chdir failed:");
