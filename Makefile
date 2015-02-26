@@ -10,9 +10,10 @@ debug: LDFLAGS += -g
 debug: all
 	
 	
-$(EXECUTABLE): obj/CS100.o obj/Shell.o
+$(EXECUTABLE): obj/CS100.o obj/Shell.o obj/cd.o
 	@mkdir -p bin
 	$(CC)  $(LDFLAGS) obj/CS100.o obj/Shell.o   -o bin/$@
+
 
 cp : obj/cp.o
 	$(CC)  $(LDFLAGS) obj/cp.o -o bin/$@
@@ -66,6 +67,12 @@ obj/DirUtils.o:src/DirUtils.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 	
+## CD files
+
+obj/cd.o:src/Cd.cpp src/log.h
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS) $< -o $@
+		
 
 # make commands
 	
