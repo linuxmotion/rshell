@@ -24,6 +24,7 @@
 #include "log.h"
 #include "SimpleGLibPipe.h"
 #include "Tokenizer.h"
+#include "Cd.h"
 
 using std::string;
 using std::vector;
@@ -302,6 +303,39 @@ bool Shell::Execute(vector<string> commandVect, bool wait){
 
 	return false;
 }
+
+int Shell::isInternalCommand(const vector<string> *command){
+
+	//loop though all possible internal commands
+	for(unsigned int i = 0; i < this->mInternalCommands.size(); i++){
+		// do we have a match
+		if(command->at(0) == mInternalCommands.at(i)){
+			// we do have a match
+			return i;
+		}
+	}
+
+	return -1;
+}
+bool Shell::ExecuteInternalCommand(int pos, const vector<string> *command){
+
+	log("ExecuteInternalCommand")
+	const int CD = 0;
+
+	switch(pos){
+
+		case CD:{
+			return Cd::callCD(command);
+		}
+
+	}
+
+	return false;
+}
+
+void Shell::setupInternalCommandList(){
+	mInternalCommands.push_back("cd");
+}
 bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 
@@ -320,6 +354,13 @@ bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 	// loop through the commands to execute
 	for(int execi = 0; execi < size; execi++){
+
+		log("Checking againsts internal commands")
+		int pos = isInternalCommand(&execCommandSet[execi]);
+		if(pos != -1){
+			success = ExecuteInternalCommand(pos, &execCommandSet[execi]);
+			continue;
+		}
 
 		log("Finding exit status")
 		if(NeedToExit(execCommandSet[execi])){

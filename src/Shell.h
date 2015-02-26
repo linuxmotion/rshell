@@ -20,15 +20,22 @@ public:
 	virtual ~Shell();
 private:
 
-	void PrintCommandPrompt();
 	void Run();
-
+	void PrintCommandPrompt();
 	string ReadInCommands();
 	vector<vector<string> > ParseCommands(string commandStream);
+
+	vector<string> mInternalCommands;
+	void setupInternalCommandList();
+	int  isInternalCommand(const vector<string> *command);
+	bool ExecuteInternalCommand(int pos, const vector<string> *command);
 	bool NeedToExit(vector<string> commands);
+
+
 	bool Execute(vector<string> command);
 	bool Execute(vector<string> command, bool wait);
 	bool ExecuteCommands(vector<vector<string> > command);
+
 	virtual bool HandleConnectors(int size,
 						  int &execi,
 						  vector<vector<string> > execCommandSet,

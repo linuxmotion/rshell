@@ -16,7 +16,7 @@ using std::vector;
 
 class Cd {
 public:
-	static bool callCD(vector<string> tokens);
+	static bool callCD(const vector<string> *tokens);
 
 private:
 	static string handleDotandTilde(const vector<string> tokens);

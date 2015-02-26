@@ -1,7 +1,7 @@
 CC=g++
-CFLAGS= -Wall
-LDFLAGS= 
-SOURCES=src/CS100.cpp src/Shell.cpp  
+CFLAGS= -Wall 
+LDFLAGS=
+#SOURCES=src/CS100.cpp src/Shell.cpp  
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=rshell
 
@@ -12,14 +12,14 @@ debug: all
 	
 $(EXECUTABLE): obj/CS100.o obj/Shell.o obj/cd.o
 	@mkdir -p bin
-	$(CC)  $(LDFLAGS) obj/CS100.o obj/Shell.o   -o bin/$@
+	$(CC)  $(LDFLAGS) obj/CS100.o obj/Shell.o  obj/cd.o  -o bin/$@
 
 
-cp : obj/cp.o
+cp : obj/cp.o 
 	$(CC)  $(LDFLAGS) obj/cp.o -o bin/$@
 	
-ls:obj/Lslib.o obj/Ls.o
-	$(CC)  $(LDFLAGS) obj/Lslib.o obj/Ls.o -o bin/$@	
+ls:obj/Lslib.o obj/Ls.o 
+	$(CC)  $(LDFLAGS) obj/Lslib.o obj/Ls.o  -o bin/$@	
 	
 	
 ## CP files
@@ -33,24 +33,17 @@ obj/cp.o : src/cp.cpp
 
 
 
-obj/Shell.o: src/Shell.cpp # src/Tokenizer.cpp src/log.cpp src/SimpleGlibPipe.cpp
+obj/Shell.o: src/Shell.cpp  
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS)  $<  -o $@
+		
+obj/CS100.o: src/CS100.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $< -o $@
 	
-obj/SimpleGLibPipe.o: src/SimpleGLibPipe.h
+obj/tokenizer.o: src/Tokenizer.h
 	@mkdir -p obj
-	$(CC) -c $(CFLAGS) $< -o $@
-	
-obj/CS100.o: src/CS100.cpp src/Shell.cpp
-	@mkdir -p obj
-	$(CC) -c $(CFLAGS)  $< -o $@
-	
-obj/log.o: src/log.cpp 
-	@mkdir -p obj
-	$(CC) -c $(CFLAGS) $< -o $@
-obj/Tokenizer.o: src/Tokenizer.cpp 
-	@mkdir -p obj
-	$(CC) -c $(CFLAGS) $< -o $@	
+	$(CC) -c $(CFLAGS)  $< -o $@	
 	
 ## Ls files
 	
@@ -69,10 +62,15 @@ obj/DirUtils.o:src/DirUtils.h
 	
 ## CD files
 
-obj/cd.o:src/Cd.cpp src/log.h
+obj/cd.o:src/Cd.cpp 
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 		
+## Loggers
+	
+obj/log.o: src/log.h
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS)  $< -o $@
 
 # make commands
 	
