@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include "DirUtils.h"
-//#include "log.h"
+#include "log.h"
 #include "Tokenizer.h"
 #include "Cd.h"
 

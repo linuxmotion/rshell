@@ -10,9 +10,9 @@ debug: LDFLAGS += -g
 debug: all
 	
 	
-$(EXECUTABLE): obj/CS100.o obj/Shell.o obj/cd.o
+$(EXECUTABLE): obj/CS100.o obj/Shell.o obj/cd.o obj/log.o obj/tokenizer.o obj/DirUtils.o
 	@mkdir -p bin
-	$(CC)  $(LDFLAGS) obj/CS100.o obj/Shell.o  obj/cd.o  -o bin/$@
+	$(CC)  $(LDFLAGS) obj/CS100.o obj/Shell.o  obj/cd.o obj/log.o  -o bin/$@
 
 
 cp : obj/cp.o 
@@ -33,11 +33,11 @@ obj/cp.o : src/cp.cpp
 
 
 
-obj/Shell.o: src/Shell.cpp  
+obj/Shell.o: src/Shell.cpp  src/DirUtils.h src/log.cpp src/Tokenizer.h src/Cd.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $<  -o $@
 		
-obj/CS100.o: src/CS100.cpp 
+obj/CS100.o: src/CS100.cpp src/Shell.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $< -o $@
 	
@@ -51,7 +51,7 @@ obj/Lslib.o:src/Lslib.cpp src/DirUtils.h
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 
-obj/Ls.o:src/Ls.cpp 
+obj/Ls.o:src/Ls.cpp src/Lslib.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) $< -o $@
 	
@@ -68,7 +68,7 @@ obj/cd.o:src/Cd.cpp
 		
 ## Loggers
 	
-obj/log.o: src/log.h
+obj/log.o: src/log.cpp
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS)  $< -o $@
 
