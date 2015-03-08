@@ -7,8 +7,8 @@
 
 #include "Cd.h"
 #include "DirUtils.h"
-#define DEBUG
-//#include "log.h"
+
+#include "log.h"
 
 #include <unistd.h>
 #include <stdlib.h>

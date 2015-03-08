@@ -141,7 +141,8 @@ void Shell::PrintCommandPrompt(){
 	if(!gethostname(buff, 256)){
 		host = buff;
 	}
-	printf("%s@%s$ ", name.c_str(), host.c_str() );
+
+	printf("%s@%s:%s$ ", name.c_str(), host.c_str(),  DirUtils::get_cwd().c_str() );
 	//Get the line that was entered
 
 }
