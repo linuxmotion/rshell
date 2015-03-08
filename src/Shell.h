@@ -60,6 +60,8 @@ private:
 			vector<string>& LeftHandSide);
 
 
+	vector<string> getEnvVar(string var, string delim);
+
 };
 
 #endif /* RSHELL_H_ */
