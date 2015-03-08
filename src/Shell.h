@@ -21,7 +21,7 @@ public:
 private:
 
 	void Run();
-	void PrintCommandPrompt();
+	void static PrintCommandPrompt();
 	string ReadInCommands();
 	vector<vector<string> > ParseCommands(string commandStream);
 
@@ -58,6 +58,8 @@ private:
 	bool handleParentExecution(pid_t pid,bool wait);
 	void handleLeftRedirect(vector<string>& RightHandSide,
 			vector<string>& LeftHandSide);
+
+
 
 
 };

@@ -18,6 +18,7 @@
 #include <fcntl.h>
 
 #include <ctype.h>
+#include <signal.h>
 #include <algorithm>
 
 #include "DirUtils.h"
@@ -81,9 +82,17 @@ void Shell::orConnector(bool& doExecution, bool& success, int execi, int size,
 	}
 }
 
+void sigInt(int sigint){
+
+
+
+	//printf("\n\nCaught SIGINT\n\n");
+
+}
 void Shell::StartShell(int argc, char **argv){
 
 	log("Starting shell")
+	signal(SIGINT, sigInt);
 	Run();
 
 
