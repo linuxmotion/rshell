@@ -237,9 +237,55 @@ void Shell::handleChildExecution(vector<string> commandVector) {
 
 	log("Executing: ")
 	log(argv[0]);
-	execvp(argv[0], argv);
+	log("PATH #'s:" )
+
+	vector<string> paths = getEnvVar("PATH", ":");
+
+	char *oprogram = new char;
+	strcpy(oprogram, argv[0]);
+	for(unsigned int i = 0; i < paths.size(); i++){
+		string program = paths[i]+ "/" + oprogram;
+		strcpy(argv[0],program.c_str());
+		log("executing:" + program)
+		execv(program.c_str(), argv);
+	}
+	string err = "All exec failed. Program ";
+			err += oprogram;
+			err += " does not exists";
+	perror(err.c_str());
 
 	exit(EXIT_FAILURE);
+}
+vector<string> Shell::getEnvVar(string var, string delim){
+
+
+	char *evar = getenv(var.c_str());
+	vector<string> paths;
+	// if there was no delim, we cant break it
+	if(delim.empty()){
+		paths.push_back(evar);
+		return paths;
+	}
+
+	// There will on be one set of vectors
+	char* envpath = strtok(evar, delim.c_str());
+		// Put all the tokens into a vector
+		do{
+			if(envpath == NULL){
+				break;
+			}else{
+				log(envpath)
+			}
+			// push back the program token
+			paths.push_back(envpath);
+
+			envpath = strtok(NULL, delim.c_str());
+			// Only continue if there is another
+		}while(envpath != NULL);
+		// clear the token vector for reuse
+
+	return paths;
+
 }
 
 

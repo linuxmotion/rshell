@@ -60,7 +60,7 @@ private:
 			vector<string>& LeftHandSide);
 
 
-
+	vector<string> getEnvVar(string var, string delim);
 
 };
 
