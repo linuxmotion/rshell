@@ -92,6 +92,7 @@ void sigInt(int sigint){
 void Shell::StartShell(int argc, char **argv){
 
 	log("Starting shell")
+
 	signal(SIGINT, sigInt);
 	Run();
 
@@ -235,6 +236,7 @@ void Shell::handleChildExecution(vector<string> commandVector) {
     // Last command is always NULL
 	dumpCommands(argv, size-1);
 
+
 	log("Executing: ")
 	log(argv[0]);
 	log("PATH #'s:" )
@@ -244,6 +246,7 @@ void Shell::handleChildExecution(vector<string> commandVector) {
 	char *oprogram = new char;
 	strcpy(oprogram, argv[0]);
 	for(unsigned int i = 0; i < paths.size(); i++){
+
 		string program = paths[i]+ "/" + oprogram;
 		strcpy(argv[0],program.c_str());
 		log("executing:" + program)
@@ -268,7 +271,10 @@ vector<string> Shell::getEnvVar(string var, string delim){
 	}
 
 	// There will on be one set of vectors
-	char* envpath = strtok(evar, delim.c_str());
+	char* envt = new char[256];
+	strcpy(envt, evar);
+
+	char * envpath = strtok(envt, delim.c_str());
 		// Put all the tokens into a vector
 		do{
 			if(envpath == NULL){
@@ -283,6 +289,8 @@ vector<string> Shell::getEnvVar(string var, string delim){
 			// Only continue if there is another
 		}while(envpath != NULL);
 		// clear the token vector for reuse
+
+	delete envt;
 
 	return paths;
 
