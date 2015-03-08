@@ -1,0 +1,19 @@
+
+# single commands(and arguments) with output redirection
+echo "Hello" > test/testf
+echo "I am line two" >> test/testf
+echo "Wooo im the first line again" > test/testf
+
+# single commands(and arguments) with input redirection
+
+
+
+# multiple commands(and arguments) with output redirection
+echo "Hello" > test/testf
+echo "I am line two" >> test/testf
+echo "Wooo im the first line again" > test/testf
+
+# multiple commands(and arguments) with input redirection
+
+
+
