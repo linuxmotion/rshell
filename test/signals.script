@@ -1,0 +1,27 @@
+Script started on Mon 09 Mar 2015 06:25:33 PM PDT
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ bin/rshell
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cd
+john@Conical-Desktop-X4:/home/john$ cd bin
+john@Conical-Desktop-X4:/home/john/bin$ cd ..
+john@Conical-Desktop-X4:/home/john$ cd /bin
+john@Conical-Desktop-X4:/bin$ cd
+john@Conical-Desktop-X4:/home/john$ cd /usr/bin
+john@Conical-Desktop-X4:/usr/bin$ c cd ./bin
+chdir failed:: No such file or directory
+john@Conical-Desktop-X4:/usr/bin$ cd /
+john@Conical-Desktop-X4:/$  cat
+^CThe child did not exit properly: Success
+john@Conical-Desktop-X4:/$ git clone http://github.com/t thelinuxmotion/rshell.git
+*** Error in `bin/rshell': free(): invalid next size (fast): 0x0000000001ec4040 ***
+The child did not exit properly: Success
+john@Conical-Desktop-X4:/$ 
+john@Conical-Desktop-X4:/$ cd
+john@Conical-Desktop-X4:/home/john$ cd wor   Workspace/CS100
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ make
+g++   obj/CS100.o obj/Shell.o  obj/cd.o obj/log.o  -o bin/rshell
+g++   obj/Lslib.o obj/Ls.o  -o bin/ls	
+g++   obj/cp.o -o bin/cp
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ exit
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ exit
+
+Script done on Mon 09 Mar 2015 06:27:59 PM PDT
