@@ -43,10 +43,10 @@ void dumpEntireCommandVector(vector<vector<string> > commandSet) {
 
 #ifdef DEBUG
 	std::cout << std::endl << "Start dump"<< std::endl ;
-	log("Entire commandset: " + IntToString(commandSet.size()))
+	log("Entire commandset size: " + IntToString(commandSet.size()))
 	for(unsigned int i = 0; i < commandSet.size(); i++){
-		string screen = "commandset :";
-		log(screen)
+		string screen = "commandset: ";
+		log(screen + IntToString(i))
 		vector<string> commandString = commandSet[i];
 		string command = IntToString(commandString.size()) + ": ";
 		for(unsigned int z = 0; z < commandString.size(); z++){

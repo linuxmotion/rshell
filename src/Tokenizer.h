@@ -26,20 +26,21 @@ public:
 	static vector<vector<string> > TokenizeCommandStream(string commandStream) {
 
 	log("Tokenizing commands")
-	vector<vector<string> > completedENDedCommands = TokenizeToLogicalEND(commandStream);
-	vector<vector<string> > completedPipeRedirCommands = TokenizeVector(completedENDedCommands, "|");
-	vector<vector<string> > completedORedCommands = TokenizeToLogicalOR(completedPipeRedirCommands);
-	vector<vector<string> > completedANDCommands = TokenizeToLogicalAND(completedORedCommands);
-	vector<vector<string> > completedRightRedirCommands = TokenizeVector(completedANDCommands, ">");
-	vector<vector<string> > completedLeftRedirCommands = TokenizeVector(completedRightRedirCommands, "<");
+	vector<vector<string> > VectorizedTokens;
 
-	vector<vector<string> > completedTokenCommands = TokenizeToSpaces(completedLeftRedirCommands);
+	VectorizedTokens = TokenizeToLogicalEND(commandStream);
+	TokenizeVector(&VectorizedTokens, "|");
+	TokenizeToLogicalOR(&VectorizedTokens);
+	TokenizeToLogicalAND(&VectorizedTokens);
+	TokenizeVector(&VectorizedTokens, ">");
+	TokenizeVector(&VectorizedTokens, "<");
+	TokenizeToSpaces(&VectorizedTokens);
 	log("There is a total of ")
-	log(completedTokenCommands.size())
+	log(VectorizedTokens.size())
 	log("Commands to run")
-	dumpEntireCommandVector(completedTokenCommands);
+	dumpEntireCommandVector(VectorizedTokens);
 
-	return completedTokenCommands;
+	return VectorizedTokens;
 
 }
 private:
@@ -80,14 +81,15 @@ private:
 			// if no delim is found
 
 			log("First string")
-			log(start)
-			log(foundAt)
+			log("Start pos = " << start)
+			log("Delim found at " << foundAt)
 			if(foundAt < 0){
 				end = completeStream.size();
 			}
-			log(end)
+			log("End found at " << end)
 
 			int sSize = end-start;
+			log("Copying " << sSize << " characters")
 			commandString = new char[sSize+1];
 			for(int i = 0; i < (sSize+1); i++){
 				commandString[i] = '\0';
@@ -104,7 +106,7 @@ private:
 				commandSet.push_back(commands);
 				break;
 			}
-
+			log("Pushing back command string")
 			completeStream.copy(commandString, sSize, start);
 			log(string(commandString))
 			//push back the command stream between tokens
@@ -114,15 +116,17 @@ private:
 				break;
 			}
 
-			start = foundAt;
-
-			log(start)
 			char c = commandString[0];
 			for(int i = 0; c != '\0'; i++){
 				c = commandString[i];
 				log(c)
 
 			}
+			// advance to the delim
+			start = foundAt;
+
+			log("Start pos = " << start)
+
 			//}
 
 			commandString = 0;
@@ -135,10 +139,10 @@ private:
 
 			// Next grab the delim
 			log("Second string: delim")
-			log(start)
+			log("Start pos = " << start)
 			log(delim.size());
 			end = start + delim.size();
-			log(end)
+			log("end pos = " << end)
 
 			sSize = delim.size();// end-start;
 			if((delim.size() == 1 )&& (completeStream[start] ==  delim[0]) && (completeStream[start+1] ==  delim[0])){
@@ -166,7 +170,7 @@ private:
 
 
 			// next start of token happens after the delim
-			start = end + delim.size();
+			start = end;// + delim.size();
 			// push back the tokenized vector
 
 			commandSet.push_back(commands);
@@ -188,7 +192,7 @@ private:
 	// All vectors are size 2
 	// except the last command, or if there is a single, which can be size one
 	// string in the form of [command and flags and other connectors][connector]
-	static vector<vector<string> >  TokenizeVector(vector<vector<string> > commandVector, string tok){
+	static vector<vector<string> >  TokenizeVector(vector<vector<string> > *commandVector, string tok){
 		string message = "Tokenizing vector by " + tok;
 		log(message)
 
@@ -196,14 +200,14 @@ private:
 		vector<vector<string> > commandSet;
 		char* buffer = new char[256];
 
-		log("will tokenize " + IntToString(commandVector.size()) + " vectors")
+		log("will tokenize " + IntToString(commandVector->size()) + " vectors")
 		// loop trough our set of commands
-		for(unsigned int i = 0; i <= commandVector.size()-1; i++){
+		for(unsigned int i = 0; i <= (commandVector->size()-1); i++){
 			log("Looping through vectors to tokenize")
 			// loop through the connectorized vectors
-			log(commandVector.at(i).at(0))
+			log(commandVector->at(i).at(0))
 
-			spaceVector = &commandVector.at(i); //[stuff][connector]
+			spaceVector = &commandVector->at(i); //[stuff][connector]
 			log("Tokenizing " + IntToString(i) + " vector")
 			vector<string> flattencommand;
 			// tokenize each string
@@ -215,14 +219,14 @@ private:
 			// loop through the return vectors
 			// get the vector reference
 			for(unsigned int j = 0; j < commands.size(); j++){
-				vector<string> *command = &commands.at(j);//[stuff][connector]
+				vector<string> command = commands.at(j);//[stuff][connector]
 				log("Got the reference")
-				for(unsigned int z = 0; z < command->size(); z++){
+				for(unsigned int z = 0; z < command.size(); z++){
 					// push back each string
 					log("Pushing back command")
-					string s = command->at(z);
+					string s = command.at(z);
 					log(s)
-					flattencommand.push_back(command->at(z));
+					flattencommand.push_back(command.at(z));
 				}
 				// add back on the deliminator
 				log("add back delim if there was one")
@@ -250,15 +254,16 @@ private:
 		log(commandSet.size())
 		log("command sets")
 
+		*commandVector = commandSet;
 
-		return commandSet;
+		return *commandVector;
 
 	}
 	// Tokenize a string by the logical OR operator ||
 	// All vectors are size 2
 	// except the last command, or if there is a single, which can be size one
 	// string in the form of [command and flags and other connectors][connector]
-	static vector<vector<string> >  TokenizeToLogicalOR(vector<vector<string> > commandVector){
+	static vector<vector<string> >  TokenizeToLogicalOR(vector<vector<string> > *commandVector){
 		log("Tokenizing or")
 
 		vector<string> spaceVector;
@@ -266,10 +271,10 @@ private:
 		vector<vector<string> > commandSet;
 		char* buffer = new char[256];
 		// loop through the connectorized vectors
-		for(unsigned int i = 0; i < commandVector.size(); i++){
+		for(unsigned int i = 0; i < commandVector->size(); i++){
 			log("Looping through vectors to ORize")
 
-			spaceVector = commandVector[i];
+			spaceVector = commandVector->at(i);
 			log("Tokenizing a OR_Vector")
 			// tokenize each string
 			strcpy(buffer,spaceVector[0].c_str());
@@ -315,7 +320,9 @@ private:
 		log("found ")
 		log(commandSet.size())
 		log("command sets")
-		return commandSet;
+
+		*commandVector = commandSet;
+		return *commandVector;
 
 
 
@@ -324,7 +331,7 @@ private:
 	// All vectors are size 2
 	// except the last command, or if there is a single, which can be size one
 	// string in the form of [command and flags and othe connectors][connector]
-	static vector<vector<string> >  TokenizeToLogicalAND(vector<vector<string> > parseVector){
+	static vector<vector<string> >  TokenizeToLogicalAND(vector<vector<string> > *parseVector){
 		log("Tokenizing and")
 
 		vector<string> spaceVector;
@@ -332,11 +339,11 @@ private:
 		vector<vector<string> > commandSet;
 		char* buffer;
 
-		for(unsigned int i = 0; i < parseVector.size(); i++){
+		for(unsigned int i = 0; i < parseVector->size(); i++){
 			log("Looping through vectors to ANDerize")
 			// loop through the connectorized vectors
-			spaceVector = parseVector[i];
-			log(parseVector[i][0])
+			spaceVector = parseVector->at(i);
+			log(spaceVector[0])
 			//for(int z = 0; z < spaceVector.size(); z++){
 			log("Tokenizing a spaceVector")
 			// tokenize each string
@@ -403,6 +410,8 @@ private:
 		log("command stream")
 
 
+		*parseVector = commandSet;
+
 		return commandSet;
 
 	}
@@ -412,7 +421,7 @@ private:
 	// strings in the form of [command and flags and othe connectors][connector]
 	// after this command finishes vectors are in the form
 	// [command] [flag1] [flag2] .... [connector]
-	static vector<vector<string> >  TokenizeToSpaces(vector<vector<string> > completeStream){
+	static vector<vector<string> >  TokenizeToSpaces(vector<vector<string> > *completeStream){
 		log("Tokenizing spaces")
 
 		vector<string> spaceVector;
@@ -420,10 +429,10 @@ private:
 		vector<vector<string> > commandSet;
 		char* buffer = new char[256];
 
-		for(unsigned int i = 0; i < completeStream.size(); i++){
+		for(unsigned int i = 0; i < completeStream->size(); i++){
 			log("Looping through vectors to spacerize")
 			// Grab the vector to tokenize by space
-			spaceVector = completeStream[i];
+			spaceVector = completeStream->at(i);
 			log(spaceVector[0]);
 			log("Tokenizing a vector for spaces")
 			// Grab the string to spacerize
@@ -466,7 +475,9 @@ private:
 		log("found ")
 		log(commandSet.size())
 		log("command stream")
-		return commandSet;
+
+		*completeStream = commandSet;
+		return *completeStream;
 
 	}
 

@@ -26,6 +26,7 @@ private:
 	vector<vector<string> > ParseCommands(string commandStream);
 
 	vector<string> mInternalCommands;
+	string VERSION;
 	void setupInternalCommandList();
 	int  isInternalCommand(const vector<string> *command);
 	bool ExecuteInternalCommand(int pos, const vector<string> *command);
@@ -46,16 +47,16 @@ private:
 							    	   vector<string>& rightHandSide);
 	bool rightRedirection(vector<string>& leftHandSide,
 								 vector<string>& rightHandSide);
-	bool handlePipe(vector<string>& leftHandSide,
-					vector<string>& rightHandSide);
+	bool ExecutePipes(int executionIndex,
+					vector<vector<string> > commandSet);
 	void orConnector(bool& doExecution,
 					 bool& success,
 					 int execi,
 					 int size,
 					 vector<vector<string> > execCommandSet,
 					 bool& resetExecution);
-	void handleChildExecution(vector<string> command);
-	bool handleParentExecution(pid_t pid,bool wait);
+	void ExecuteChildProcess(vector<string> command);
+	bool ExecuteParentProcess(pid_t pid,bool wait);
 	void handleLeftRedirect(vector<string>& RightHandSide,
 			vector<string>& LeftHandSide);
 

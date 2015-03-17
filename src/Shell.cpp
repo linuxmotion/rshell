@@ -36,6 +36,7 @@ using std::vector;
 Shell::Shell() {
 	// TODO Auto-generated constructor stub
 	setupInternalCommandList();
+	VERSION = "0.9-lynx";
 
 }
 
@@ -196,7 +197,7 @@ vector<vector<string> > Shell::ParseCommands(string commandStream){
 // Accepts a command vector
 // commands are in the form
 // [command] [flag] --- [flag] [connector]
-void Shell::handleChildExecution(vector<string> commandVector) {
+void Shell::ExecuteChildProcess(vector<string> commandVector) {
 
 	vector<string> command = commandVector;
 	log("Executing child process " + commandVector[0])
@@ -298,7 +299,7 @@ vector<string> Shell::getEnvVar(string var, string delim){
 }
 
 
-bool Shell::handleParentExecution(pid_t pid,bool wait) {
+bool Shell::ExecuteParentProcess(pid_t pid,bool wait) {
 	log("Parent execution after fork started");
 		/**
 		 * if somewhere there is a &
@@ -347,13 +348,13 @@ bool Shell::Execute(vector<string> commandVect, bool wait){
 	if(PID == 0){
 		// Child process
 		log("In child process");
-		handleChildExecution(commandVect);
+		ExecuteChildProcess(commandVect);
 		log("this should not print");
 		return true;
 	}
 	else if(PID > 0){
 		// Parent process
-		return handleParentExecution(PID, wait);
+		return ExecuteParentProcess(PID, wait);
 	}
 	else{
 		perror("Something bad happened with fork");
@@ -387,12 +388,18 @@ bool Shell::ExecuteInternalCommand(int pos, const vector<string> *command){
 
 	log("ExecuteInternalCommand")
 	const int CD = 0;
+	const int VERSION = 1;
 
 	switch(pos){
 
 		case CD:{
 			log("Calling CD")
 			return Cd::callCD(command);
+		}
+		case VERSION:{
+			log("Printing version")
+			printf("%s\n",this->VERSION.c_str());
+			return true;
 		}
 
 	}
@@ -402,6 +409,7 @@ bool Shell::ExecuteInternalCommand(int pos, const vector<string> *command){
 
 void Shell::setupInternalCommandList(){
 	mInternalCommands.push_back("cd");
+	mInternalCommands.push_back("--version");
 }
 bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
@@ -410,19 +418,18 @@ bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 	bool success = true;
 	// set initial execution status to true
 	bool doExecution = true;
-	int size = execCommandSet.size();
+	int commandSetsize = execCommandSet.size();
 
-	log("Looping through " + IntToString(size) + " command sets" )
+	log("Looping through " + IntToString(commandSetsize) + " command sets" )
+
 #ifdef DEBUG
-	for(unsigned int i = 0; i < execCommandSet.size(); i++){
-		dumpCommandVector(execCommandSet[i]);
-	}
+		dumpEntireCommandVector(execCommandSet);
 #endif
 
 	// loop through the commands to execute
-	for(int execi = 0; execi < size; execi++){
+	for(int execi = 0; execi < commandSetsize; execi++){
 
-		log("Checking againsts internal commands")
+		log("Checking against internal commands")
 		int pos = isInternalCommand(&execCommandSet[execi]);
 		if(pos != -1){
 			success = ExecuteInternalCommand(pos, &execCommandSet[execi]);
@@ -440,7 +447,7 @@ bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 			// grab the commands set to execute
 			vector<string> command = execCommandSet[execi];
 
-			bool execFromRedir = HandleConnectors(size,
+			bool execFromRedir = HandleConnectors(commandSetsize,
 												  execi,
 												  execCommandSet,
 												  doExecution,
@@ -449,6 +456,7 @@ bool Shell::ExecuteCommands(vector<vector<string> > execCommandSet){
 
 
 
+			log("Index:" + IntToString(execi))
 			if(!execFromRedir && doExecution){
 				log("Will execute a command")
 				success = Execute(command);
@@ -549,21 +557,39 @@ void Shell::handleLeftRedirect(vector<string>& LeftHandSide,
 	log("Opened redirection pipe to " << st)
 	if (file < 0) {
 		perror("I/O Error: Failed to get a valid file descriptor");
-		//return false;
+		return;
 	}
 	st = 0;
 	delete st;
 	log("Connecting the input stream to " << LeftHandSide[0])
 	//Now we redirect standard output to the file using dup2
 	int save = dup(STDIN_FILENO);
-	dup2(file, STDIN_FILENO);
+	if(save == -1){
+		perror("dup failed: ");
+		return;
+	}
+	if(dup2(file, STDIN_FILENO) == -1){
+		perror("dup2 failed: ");
+		return;
+	}
+	// If we have reached this point it mean all of the
+	// file descriptors were valid and are ready
 	Execute(LeftHandSide);
 	log("Closing inputstream fd")
-	close(file);
-	dup2(save, STDIN_FILENO);
+	if(close(file) == -1){
+		perror("close failed: ");
+	}
+
+	if(dup2(save, STDIN_FILENO) == -1){
+		perror("dup2 failed: ");
+	}
+	if(close(save) == -1){
+		perror("close failed: ");
+	}
+
 }
 
-bool Shell::HandleConnectors(int size,
+bool Shell::HandleConnectors(int commandSetsize,
 					  int &execi,
 					  vector<vector<string> > execCommandSet,
 					  bool &doExecution,
@@ -575,19 +601,20 @@ bool Shell::HandleConnectors(int size,
 	// set of commands to execute
 
 
-	if((execi > 0) && (size > 1)){
+	if((execi > 0) && (commandSetsize > 1)){
 
 		 //HandleConnectors();
 		 log("Searching for a connector")
 		 // Grab a ptr to the prevois vector
 		 // This is why we must have more than one vector
-		 vector<string> tmp = execCommandSet[execi-1]; // I really hate having to do this line
+		 vector<string> tmp = execCommandSet[execi-1];
+		 dumpCommandVector(tmp);
 		 string connector = tmp[tmp.size()-1];
 		 // if the connector was a ; execute the command
 		 // if it was || execute only if the last one failed
 		 // if it was a && execute if it succeded
 		 if(connector.compare("||") == 0) {
-				 orConnector(doExecution, success, execi, size,
+				 orConnector(doExecution, success, execi, commandSetsize,
 								 execCommandSet, resetExecution);
 		 }
 		 else if(connector.compare("&&") == 0){
@@ -607,7 +634,7 @@ bool Shell::HandleConnectors(int size,
 		// on the last command a connector
 		// we should only check the connector if there is only more than one
 		// set of commands to execute
-		if(size > 1){
+		if(commandSetsize > 1){
 
 			//HandleConnectors();
 			log("Searching for a connector")
@@ -617,11 +644,11 @@ bool Shell::HandleConnectors(int size,
 			vector<string> RightHandSide;
 			string connector = LeftHandSide[LeftHandSide.size()-1];
 
-			// mark the next command as processed
-			execi++;
 
 			if(connector.compare(">>") == 0){
 				log("Found a >> connector")
+				// mark the next command as processed
+				execi++;
 				RightHandSide = execCommandSet[execi];
 				// handle right redirection with append
 				rightRedirectionAppend(LeftHandSide, RightHandSide);
@@ -629,6 +656,8 @@ bool Shell::HandleConnectors(int size,
 			}
 			else if(connector.compare(">") == 0){
 				log("Found a > connector")
+				// mark the next command as processed
+				execi++;
 				RightHandSide = execCommandSet[execi];
 				// handle right redirection with append
 				rightRedirection(LeftHandSide, RightHandSide);
@@ -638,14 +667,21 @@ bool Shell::HandleConnectors(int size,
 			// i should handle pipes in a loop
 			else if(connector.compare("<") == 0){
 				log("Found a < connector")
+				// mark the next command as processed
+				execi++;
 				RightHandSide = execCommandSet[execi];
 				handleLeftRedirect(LeftHandSide, RightHandSide );
 				return true;
 				// handle right redirection with append
 			}else if(connector.compare("|") == 0){
+				// Neesd to handle more than one pipe
 				log("Found a | connector")
-				RightHandSide = execCommandSet[execi];
-				handlePipe(LeftHandSide, RightHandSide );
+				// mark the next command as processed
+				//execi++;
+				//RightHandSide = execCommandSet[execi];
+				int pipesExecuted = ExecutePipes(execi, execCommandSet);
+				// Advance for the amount of pipes
+				execi += pipesExecuted;
 				return true;
 				// handle right redirection with append
 			}
@@ -661,8 +697,37 @@ bool Shell::HandleConnectors(int size,
 
 }
 
-bool Shell::handlePipe(vector<string>& leftHandSide,
-		vector<string>& rightHandSide){
+bool Shell::ExecutePipes(int execIndex,
+		vector<vector<string> > rightHandSide){
+
+
+		// Find the number of pipes to execute
+		// This mean to find &&,||,; then count from our starting pos
+
+		// setup all the pipes to execute
+		// Should be N-1 or N-2 if the first command was input redirected
+
+		// execute each pipe in sucession
+
+		// if command one has input redirection
+			// set up left redirection and pipes
+			// execute command
+			// advance pipe counter to appropraite location
+
+		// set input fd = 0
+		// for each command to pipe
+		// create a pipe
+			// fork to new process and pass input fd
+				// set input fd to 0 if in != 0 (dup)
+				// close input fd
+				// set output fd to 0 if out != 1 (dup)
+				// execute the command
+			// Close the pipe fd[1]
+			// set ipnut fd to fd[0] of pipe
+			// continue loop
+
+		//set input fd to 0 (dup)
+		//execute last command
 
 
 		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
@@ -682,7 +747,7 @@ bool Shell::handlePipe(vector<string>& leftHandSide,
 			dup(fd[1]);
 			close(fd[0]);
 			close(fd[1]);
-			handleChildExecution(leftHandSide);
+			ExecuteChildProcess(leftHandSide);
 		}
 
 		kidpid2 = fork();
@@ -695,14 +760,14 @@ bool Shell::handlePipe(vector<string>& leftHandSide,
 			dup(fd[0]);
 			close(fd[0]);
 			close(fd[1]);
-			handleChildExecution(rightHandSide);
+			ExecuteChildProcess(rightHandSide);
 		}
 
 		close(fd[0]);
 		close(fd[1]);
 
-		handleParentExecution(kidpid1, true);
-		handleParentExecution(kidpid2, true);
+		ExecuteParentProcess(kidpid1, true);
+		ExecuteParentProcess(kidpid2, true);
 
 #ifdef DEBUG
 		string lside = leftHandSide[0];
