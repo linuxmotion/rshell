@@ -35,7 +35,7 @@ public:
 		int status = pipe(mPipes);
 		//
 		if(status == -1){
-			perror(strerror(errno));
+			perror("pipe failed: ");
 			return false;
 		}
 		// Set a status flag so that
@@ -54,7 +54,7 @@ public:
 	 */
 	int getWritePipe(){
 
-		if(mOpenPipes[1] < 0){
+		if(mOpenPipes[1] != 1){
 			fprintf(stderr, "Failed to get write pipe");
 			return -1;
 		}
@@ -66,7 +66,7 @@ public:
 	 * Returns -1 on error.
 	 */
 	int getReadPipe(){
-		if(mOpenPipes[0] < 0){
+		if(mOpenPipes[0] != 1){
 			fprintf(stderr,"Failed to get read pipe");
 			return -1;
 		}

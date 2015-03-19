@@ -7,6 +7,7 @@ EXECUTABLE=rshell
 
 all: $(SOURCES) $(EXECUTABLE) ls cp
 debug: LDFLAGS += -g
+debug: CFLAG += -g
 debug: all
 	
 	

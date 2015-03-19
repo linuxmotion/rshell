@@ -94,7 +94,7 @@ void Shell::StartShell(int argc, char **argv){
 
 	log("Starting shell")
 
-	signal(SIGINT, sigInt);
+	//signal(SIGINT, sigInt);
 	Run();
 
 
@@ -604,7 +604,7 @@ bool Shell::HandleConnectors(int commandSetsize,
 	if((execi > 0) && (commandSetsize > 1)){
 
 		 //HandleConnectors();
-		 log("Searching for a connector")
+		 log("Searching for a logical connector")
 		 // Grab a ptr to the prevois vector
 		 // This is why we must have more than one vector
 		 vector<string> tmp = execCommandSet[execi-1];
@@ -637,14 +637,14 @@ bool Shell::HandleConnectors(int commandSetsize,
 		if(commandSetsize > 1){
 
 			//HandleConnectors();
-			log("Searching for a connector")
+			log("Searching for redirection a connector")
 			// Grab a ptr to the prevois vector
 			// This is why we must have more than one vector
 			vector<string> LeftHandSide = execCommandSet[execi];
 			vector<string> RightHandSide;
 			string connector = LeftHandSide[LeftHandSide.size()-1];
 
-
+			log(connector)
 			if(connector.compare(">>") == 0){
 				log("Found a >> connector")
 				// mark the next command as processed
@@ -697,16 +697,72 @@ bool Shell::HandleConnectors(int commandSetsize,
 
 }
 
-bool Shell::ExecutePipes(int execIndex,
-		vector<vector<string> > rightHandSide){
+int Shell::SpawnPipeProc(int in, int out, vector<string>  commandSet)
+{
 
+	log("Spawning child process for pipe " << commandSet[0])
+			log("input FD = " << in  <<" |  output fd = " << out)
+  pid_t pid;
+
+  if ((pid = fork ()) == 0)
+    {
+
+	  if(in != 0){
+		  dup2(in, STDIN_FILENO);
+	  	  close(STDOUT_FILENO);
+	  }
+
+	  if(out != 0){
+		  dup2(out, STDOUT_FILENO);
+	  	  close(STDIN_FILENO);
+	  }
+	  log("Executing piped child process")
+      ExecuteChildProcess(commandSet);
+    }
+
+  return pid;
+}
+
+#include "SimpleGLibPipe.h"
+
+int Shell::ExecutePipes(int execIndex,
+		vector<vector<string> > commandSet){
+
+		log("execute pipes")
 
 		// Find the number of pipes to execute
 		// This mean to find &&,||,; then count from our starting pos
 
 		// setup all the pipes to execute
 		// Should be N-1 or N-2 if the first command was input redirected
+		int numPipes = 0;
+		bool inputredir = false;
+		log("Finding number of pipes to execute")
+		for(unsigned int i = execIndex; i < commandSet.size(); i++){
+			vector<string> *tmp = &commandSet[i];
+			string  delim = tmp->at(tmp->size()-1);
+			log(delim)
+			if((delim == "&&") || (delim == "||") ||(delim == ";")){
 
+				break;
+			}
+			numPipes = i;
+		}
+		log("Found " << numPipes << " pipe to execute")
+
+		if(commandSet[execIndex][commandSet[0].size() - 1] == "<"){
+			log("Out initial command was input redirected")
+			inputredir = true;
+			numPipes--;
+		}
+
+		vector<SimpleGlibPipe> Pipes;
+		for(int i = 0; i < numPipes; i++){
+			//SimpleGlibPipe p;
+			//Pipes.push_back(p);
+			//p.getWritePipe();
+		}
+		//Pipes[0].getWritePipe();
 		// execute each pipe in sucession
 
 		// if command one has input redirection
@@ -729,7 +785,102 @@ bool Shell::ExecutePipes(int execIndex,
 		//set input fd to 0 (dup)
 		//execute last command
 
+	  /* The first process should get its input from the original file descriptor 0.  */
+	  int in = 0;
+	  /* Note the loop bound, we spawn here all, but the last stage of the pipeline.  */
+	  log("Executing " << numPipes << " pipes")
+	  //SimpleGlibPipe pipe;
+	  int pipefd[2];
+	  vector<pid_t> pids;
+	  for (int i = execIndex, j = 0; i < execIndex+numPipes ; ++i, j++)
+	    {
+		  pipe(pipefd);
+		  //pipefd.openPipe();
 
+		  log("Pipe opened for command " << commandSet[i][0]  << " to command " << commandSet[i+1][0] )
+		  log("Write pipe = " << pipefd[1] <<"   readpipe = " << pipefd[0])
+		  pid_t pid = SpawnPipeProc(in, pipefd[1], commandSet[i]);
+	      /* fd[1] is the write end of the pipe, we carry `in` from the prev iteration.  */
+	      pids.push_back(pid);
+	      /* No need for the write end of the pipe, the child will write here.  */
+	      //pipe.closeWritePipe();
+	      close(pipefd[1]);
+	     // /* Keep the read end of the pipe, the next child will read from there.  */
+	      in = pipefd[0];
+
+	     // ExecuteParentProcess(pid, true);
+	    }
+
+	  ///close(fd[0]);
+	  //	  pipe.closeReadPipe();
+	  /* Last stage of the pipeline - set stdin be the read end of the previous pipe
+	     and output to the original file descriptor 1. */
+	  //	  if (in != 0)
+	  //	    dup2 (in, 0);
+
+
+	 //dup2(STDIN_FILENO, in);
+	  //close()
+	 log("Executing last stage in pipeline")
+	  //pipe.setwritePipe(STDOUT_FILENO);
+	 //dup(STDOUT_FILENO);
+
+	 pid_t pid;
+
+	  if ((pid = fork ()) == 0)
+	    {
+
+		  //if(in != 0){
+			///close(STDIN_FILENO);
+			//		dup(fd[0]);
+			//		close(fd[0]);
+			//		close(fd[1]);
+		  close(STDIN_FILENO);
+		  dup(in);
+		  close(pipefd[0]);
+		  //dup2(in, STDIN_FILENO);
+		  //	  close(STDOUT_FILENO);
+		 // }
+
+		 // if(pipefd[1] != 0){
+			 // dup2(1, STDOUT_FILENO);
+		  	 //close(pipefd[0]);
+		  	 close(pipefd[1]);
+		 // }
+		  log("Write pipe = " << pipefd[1] <<"   readpipe = " << pipefd[0])
+		  log("input FD = " << in  <<" |  output fd = " <<  STDOUT_FILENO)
+		  log("Executing piped child process")
+	      ExecuteChildProcess(commandSet[execIndex + numPipes]);
+	    }
+
+
+	 //pid_t kidpid1 = SpawnPipeProc(pipefd[1], STDOUT_FILENO, commandSet[execIndex + numPipes]);
+	  /*
+	  pid_t kidpid1 = fork();
+	  if(kidpid1 < 0){
+			perror("fork failed");
+			return false;
+    	}else if( kidpid1 == 0){
+    		dup2(pipe.getReadPipe(), STDIN_FILENO);
+    		close(pipe.getWritePipe());
+			ExecuteChildProcess(commandSet[execIndex + numPipes]);
+			//ExecuteChildProcess(leftHandSide);
+		}*/
+
+	 //close(STDIN_FILENO);
+	 //close(pipefd[0]);
+	 close(pipefd[1]);
+
+	  for(unsigned int i = 0; i < pids.size(); i++){
+		  ExecuteParentProcess(pids[i], true);
+	  }
+	  ExecuteParentProcess(pid, true);
+
+
+	  /* Execute the last stage with the current process. */
+	 //;
+
+/*
 		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
 		int fd[2];
 		pid_t kidpid1 = -1; // we entered a command, fork
@@ -782,8 +933,8 @@ bool Shell::ExecutePipes(int execIndex,
 
 #endif
 
-
-	return false;
+*/
+	return (inputredir == false) ? numPipes : numPipes + 1;
 
 
 }

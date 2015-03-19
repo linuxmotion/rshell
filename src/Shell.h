@@ -47,7 +47,9 @@ private:
 							    	   vector<string>& rightHandSide);
 	bool rightRedirection(vector<string>& leftHandSide,
 								 vector<string>& rightHandSide);
-	bool ExecutePipes(int executionIndex,
+
+	int SpawnPipeProc(int in, int out, vector<string>  commandSet);
+	int ExecutePipes(int executionIndex,
 					vector<vector<string> > commandSet);
 	void orConnector(bool& doExecution,
 					 bool& success,
