@@ -94,7 +94,7 @@ void Shell::StartShell(int argc, char **argv){
 
 	log("Starting shell")
 
-	//signal(SIGINT, sigInt);
+	signal(SIGINT, sigInt);
 	Run();
 
 
@@ -184,6 +184,9 @@ vector<vector<string> > Shell::ParseCommands(string commandStream){
 
 
 	}
+	// Check to see if a comment was the only input
+	if(commandStream.empty())
+		return commandSet;
 	// log the whole stream to parse. Kick off the parser
 	log(commandStream)
 	commandSet = Tokenizer::TokenizeCommandStream(commandStream);
@@ -502,7 +505,7 @@ bool Shell::rightRedirectionAppend(vector<string>& leftHandSide,
 
 		//close(file,STDOUT_FILENO)
 
-		log("Redirecting " << rightHandSide[0].c_str() )
+
 		//Now standard out has been redirected, we can write to
 		// the file
 		Execute(leftHandSide);
@@ -521,7 +524,7 @@ bool Shell::rightRedirection(vector<string>& leftHandSide,
 		strcpy(st,DirUtils::get_cwd().c_str());
 		strcat(st, "/");
 		strcat(st, rightHandSide[0].c_str());
-		int file = open(st, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+		int file = open(st, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		log("Opened redirection pipe to " << st)
 		if(file < 0)
 			return false;
@@ -699,9 +702,9 @@ bool Shell::HandleConnectors(int commandSetsize,
 
 int Shell::SpawnPipeProc(int in, int out, vector<string>  commandSet)
 {
-
+	log("input FD = " << in  <<" |  output fd = " << out)
 	log("Spawning child process for pipe " << commandSet[0])
-			log("input FD = " << in  <<" |  output fd = " << out)
+
   pid_t pid;
 
   if ((pid = fork ()) == 0)
@@ -710,11 +713,13 @@ int Shell::SpawnPipeProc(int in, int out, vector<string>  commandSet)
 	  if(in != 0){
 		  dup2(in, STDIN_FILENO);
 	  	  close(STDOUT_FILENO);
+	  	  //close(out);
 	  }
 
 	  if(out != 0){
 		  dup2(out, STDOUT_FILENO);
 	  	  close(STDIN_FILENO);
+	  	  //close(in);
 	  }
 	  log("Executing piped child process")
       ExecuteChildProcess(commandSet);
@@ -741,8 +746,8 @@ int Shell::ExecutePipes(int execIndex,
 		for(unsigned int i = execIndex; i < commandSet.size(); i++){
 			vector<string> *tmp = &commandSet[i];
 			string  delim = tmp->at(tmp->size()-1);
-			log(delim)
-			if((delim == "&&") || (delim == "||") ||(delim == ";")){
+			//log(delim)
+			if((delim == "&&") || (delim == "||") ||(delim == ";") ||(delim == ">") ||(delim == ">>")){
 
 				break;
 			}
@@ -755,35 +760,6 @@ int Shell::ExecutePipes(int execIndex,
 			inputredir = true;
 			numPipes--;
 		}
-
-		vector<SimpleGlibPipe> Pipes;
-		for(int i = 0; i < numPipes; i++){
-			//SimpleGlibPipe p;
-			//Pipes.push_back(p);
-			//p.getWritePipe();
-		}
-		//Pipes[0].getWritePipe();
-		// execute each pipe in sucession
-
-		// if command one has input redirection
-			// set up left redirection and pipes
-			// execute command
-			// advance pipe counter to appropraite location
-
-		// set input fd = 0
-		// for each command to pipe
-		// create a pipe
-			// fork to new process and pass input fd
-				// set input fd to 0 if in != 0 (dup)
-				// close input fd
-				// set output fd to 0 if out != 1 (dup)
-				// execute the command
-			// Close the pipe fd[1]
-			// set ipnut fd to fd[0] of pipe
-			// continue loop
-
-		//set input fd to 0 (dup)
-		//execute last command
 
 	  /* The first process should get its input from the original file descriptor 0.  */
 	  int in = 0;
@@ -798,29 +774,19 @@ int Shell::ExecutePipes(int execIndex,
 		  //pipefd.openPipe();
 
 		  log("Pipe opened for command " << commandSet[i][0]  << " to command " << commandSet[i+1][0] )
-		  log("Write pipe = " << pipefd[1] <<"   readpipe = " << pipefd[0])
+		  log("readpipe = " << pipefd[0] << "  Write pipe = " << pipefd[1]    )
 		  pid_t pid = SpawnPipeProc(in, pipefd[1], commandSet[i]);
 	      /* fd[1] is the write end of the pipe, we carry `in` from the prev iteration.  */
 	      pids.push_back(pid);
 	      /* No need for the write end of the pipe, the child will write here.  */
 	      //pipe.closeWritePipe();
-	      close(pipefd[1]);
+	      //close(pipefd[1]);
 	     // /* Keep the read end of the pipe, the next child will read from there.  */
 	      in = pipefd[0];
 
 	     // ExecuteParentProcess(pid, true);
 	    }
 
-	  ///close(fd[0]);
-	  //	  pipe.closeReadPipe();
-	  /* Last stage of the pipeline - set stdin be the read end of the previous pipe
-	     and output to the original file descriptor 1. */
-	  //	  if (in != 0)
-	  //	    dup2 (in, 0);
-
-
-	 //dup2(STDIN_FILENO, in);
-	  //close()
 	 log("Executing last stage in pipeline")
 	  //pipe.setwritePipe(STDOUT_FILENO);
 	 //dup(STDOUT_FILENO);
@@ -830,45 +796,19 @@ int Shell::ExecutePipes(int execIndex,
 	  if ((pid = fork ()) == 0)
 	    {
 
-		  //if(in != 0){
-			///close(STDIN_FILENO);
-			//		dup(fd[0]);
-			//		close(fd[0]);
-			//		close(fd[1]);
-		  close(STDIN_FILENO);
-		  dup(in);
-		  close(pipefd[0]);
-		  //dup2(in, STDIN_FILENO);
-		  //	  close(STDOUT_FILENO);
-		 // }
 
-		 // if(pipefd[1] != 0){
-			 // dup2(1, STDOUT_FILENO);
-		  	 //close(pipefd[0]);
-		  	 close(pipefd[1]);
-		 // }
-		  log("Write pipe = " << pipefd[1] <<"   readpipe = " << pipefd[0])
+		  //close(STDIN_FILENO);
+		  dup2(in, STDIN_FILENO);
+		  //dup2(STDOUT_FILENO,pipefd[1]);
+		  close(pipefd[1]);
+
+		  log("readpipe = " << pipefd[0] << "  Write pipe = " << pipefd[1]    )
 		  log("input FD = " << in  <<" |  output fd = " <<  STDOUT_FILENO)
-		  log("Executing piped child process")
+		  log("Executing last piped child process")
 	      ExecuteChildProcess(commandSet[execIndex + numPipes]);
 	    }
 
-
-	 //pid_t kidpid1 = SpawnPipeProc(pipefd[1], STDOUT_FILENO, commandSet[execIndex + numPipes]);
-	  /*
-	  pid_t kidpid1 = fork();
-	  if(kidpid1 < 0){
-			perror("fork failed");
-			return false;
-    	}else if( kidpid1 == 0){
-    		dup2(pipe.getReadPipe(), STDIN_FILENO);
-    		close(pipe.getWritePipe());
-			ExecuteChildProcess(commandSet[execIndex + numPipes]);
-			//ExecuteChildProcess(leftHandSide);
-		}*/
-
-	 //close(STDIN_FILENO);
-	 //close(pipefd[0]);
+	 close(pipefd[0]);
 	 close(pipefd[1]);
 
 	  for(unsigned int i = 0; i < pids.size(); i++){
@@ -876,64 +816,6 @@ int Shell::ExecutePipes(int execIndex,
 	  }
 	  ExecuteParentProcess(pid, true);
 
-
-	  /* Execute the last stage with the current process. */
-	 //;
-
-/*
-		log("creating a pipe for " << leftHandSide[0] << " | " << rightHandSide[0]);
-		int fd[2];
-		pid_t kidpid1 = -1; // we entered a command, fork
-		pid_t kidpid2 = -1;
-
-		pipe(fd);
-
-		kidpid1 = fork();
-		if(kidpid1 < 0){
-			perror("fork failed");
-			return false;
-
-		}else if( kidpid1 == 0){
-			close(STDOUT_FILENO);
-			dup(fd[1]);
-			close(fd[0]);
-			close(fd[1]);
-			ExecuteChildProcess(leftHandSide);
-		}
-
-		kidpid2 = fork();
-		if(kidpid1 < 0){
-			perror("fork failed");
-			return false;
-
-		}else if( kidpid2 == 0){
-			close(STDIN_FILENO);
-			dup(fd[0]);
-			close(fd[0]);
-			close(fd[1]);
-			ExecuteChildProcess(rightHandSide);
-		}
-
-		close(fd[0]);
-		close(fd[1]);
-
-		ExecuteParentProcess(kidpid1, true);
-		ExecuteParentProcess(kidpid2, true);
-
-#ifdef DEBUG
-		string lside = leftHandSide[0];
-		string rside = rightHandSide[0];
-		for(unsigned int i = 1; i < leftHandSide.size(); i++){
-			lside += " " +  leftHandSide[i];
-		}
-		for(unsigned int i = 1; i < rightHandSide.size(); i++){
-			rside += " " +  rightHandSide[i];
-		}
-		log("Executed " << lside  << rside);
-
-#endif
-
-*/
 	return (inputredir == false) ? numPipes : numPipes + 1;
 
 

@@ -1,0 +1,81 @@
+### OUTPUT REDIRECTION
+#Test output redirection; #no cat
+echo Hello > test/testf # Non existant file
+cat test/testf
+echo world > test/testf
+cat test/testf
+echo hello world > test/testf
+cat test/testf
+
+# Testing redirection with cat
+echo I am line two >> test/testf
+cat test/testf
+echo I am line three >> test/testf
+cat test/testf
+
+# Output redirectiin with cat to new file
+echo I am a new file >> test/testg
+cat test/testg
+echo I have a new line >> test/testg
+cat test/testg
+
+#(FAILS)# Output redirection without spaces single argument
+echo no_spaces>>test/testf
+cat test/testf
+echo one_line>test/testf
+cat test/testf
+
+# Output redirection without spaces multiple argument
+echo I overwrote the last whole file>test/testf
+cat test/testf
+echo no spaces>>test/testf
+cat test/testf
+
+
+### INTPUT REDIRECTION
+#Input redirection from an existant file
+cd test
+cat < testf  #current directory
+cd ..
+cat < test/testf  #Realative directory
+#Input redirection from a non-existant file (should throw an error)
+cat < testf
+cat < test/testh
+#Input redirection with space
+
+#(FAILS)#Input redirection without space
+cat<testf
+cat<test/testh
+
+#Input redirection with piping
+ ls test | grep com
+
+
+### Piping
+#Command with one pipe
+ls test | grep com
+
+#(FAILS)#Command with more than one pipe
+#ls test | grep com | sed 's/piping/pipes/'
+
+#Piping with space
+cat test/testf | grep hello
+
+#Piping without space
+ls test|grep com
+
+#(FAILS)#Output redirection and piping
+#cat < test/testf | grep com
+
+#(FAILS)#Input redirection, output redirection, and piping
+#cat < test/testf | grep com > test/test.multiple
+
+### Extra Credit:
+#Input redirection from string
+#Output redirection from file descriptors
+
+rm test/testf
+rm test/testg
+
+exit
+

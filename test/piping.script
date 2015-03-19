@@ -1,0 +1,143 @@
+Script started on Wed 18 Mar 2015 10:52:56 PM PDT
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ make clean; make debug; bin/rshell
+rm -rf bin obj
+g++ -c -Wall   src/CS100.cpp -o obj/CS100.o
+g++ -c -Wall   src/Shell.cpp  -o obj/Shell.o
+g++ -c -Wall  src/Cd.cpp -o obj/cd.o
+g++ -c -Wall   src/log.cpp -o obj/log.o
+g++ -c -Wall   src/Tokenizer.h -o obj/tokenizer.o	
+g++ -c -Wall  src/DirUtils.h -o obj/DirUtils.o
+g++  -g obj/CS100.o obj/Shell.o  obj/cd.o obj/log.o  -o bin/rshell
+g++ -c -Wall  src/Lslib.cpp -o obj/Lslib.o
+g++ -c -Wall  src/Ls.cpp -o obj/Ls.o
+g++  -g obj/Lslib.o obj/Ls.o  -o bin/ls	
+g++ -c -Wall  src/cp.cpp -o obj/cp.o
+g++  -g obj/cp.o -o bin/cp
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ ### OUTPUT REDIRECTION
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ #Test output redirection; #no cat
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo Hello > test/testf # Non existant file
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+Hello
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo world > test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+world
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo hello world > test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+hello world
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ # Testing redirection with cat
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo I am line two >> test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+hello world
+I am line two
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo I am line three >> test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+hello world
+I am line two
+I am line three
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo I am a new file >> test/testg
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testg
+I am a new file
+I have a new line
+I am a new file
+I have a new line
+I am a new file
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ rm test/testg
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testg
+/bin/cat: test/testg: No such file or directory
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo I am a new file >> test/testg
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testg
+I am a new file
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo I have a new line >> test/testg
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testg
+I am a new file
+I have a new line
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ # Output redirection without spaces single argument
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo no_spaces>>test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+hello world
+I am line two
+I am line three
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo one_line>test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+hello world
+I am line two
+I am line three
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ echo I overwrote the last whole file>test/testf
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf
+hello world
+I am line two
+I am line three
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ # So input redirection wito hout apces       spaces faile s^[[D                                             
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ # output redirection without spae fail ls
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ ### INTPUT REDIRECTION
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ #Input redirection from an existant file
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cd test
+john@Conical-Desktop-X4:/home/john/Workspace/CS100/test$ cat < testf  #current directory
+hello world
+I am line two
+I am line three
+john@Conical-Desktop-X4:/home/john/Workspace/CS100/test$ cd ..
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat < test/testf  #Realative directory
+hello world
+I am line two
+I am line three
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ #Input redirection from a non-existant file (should throw an error)
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat < testf
+I/O Error: Failed to get a valid file descriptor: No such file or directory
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat < test/testh
+I/O Error: Failed to get a valid file descriptor: No such file or directory
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ #Input redirection with space
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ # ad   s above
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ #Input redirection without space
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat<testf
+I/O Error: Failed to get a valid file descriptor: No such file or directory
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat<testf^[[D^[[D^[[D                 test/testf
+I/O Error: Failed to get a valid file descriptor: No such file or directory
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ #Input redirection with piping
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ ls test | grep com
+piping.commands
+piping.commands~
+signals.commands
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ ls test
+exec.script  ls.script	piping.commands  piping.commands~  piping.script  signals.commands  signals.script  signals.script~  testf  testg  test.multiple
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ cat test/testf | grep hello
+hello world
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ git stat	
+git: 'stat	' is not a git command. See 'git --help'.
+
+Did you mean this?
+	status
+john@Conical-Desktop-X4:/home/john/Workspace/CS100$ ^[[A    exit
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ git at[K[Kstatus 
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	[31mmodified:   src/Shell.cpp[m
+	[31mmodified:   src/Tokenizer.h[m
+	[31mmodified:   src/log.h[m
+	[31mdeleted:    test/test1[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	[31mcs100-runtests~[m
+	[31mtest/piping.commands[m
+	[31mtest/piping.commands~[m
+	[31mtest/piping.script[m
+	[31mtest/signals.commands[m
+	[31mtest/signals.script~[m
+	[31mtest/test.multiple[m
+	[31mtest/testf[m
+	[31mtest/testg[m
+	[31mtestf~[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ git add src
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ git add pip[K[K[K[K test/piping.
+piping.commands   piping.commands~  piping.script     
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ git add test/piping.commands test/piping.script 
+john@Conical-Desktop-X4:~/Workspace/CS100[master]$ exit
+
+Script done on Wed 18 Mar 2015 11:01:11 PM PDT

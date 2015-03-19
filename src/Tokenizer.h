@@ -169,8 +169,8 @@ private:
 			delete commandString;
 
 
-			// next start of token happens after the delim
-			start = end;// + delim.size();
+			// next start of token happens after the delim, sSize may be a double delim
+			start = end + sSize;
 			// push back the tokenized vector
 
 			commandSet.push_back(commands);
